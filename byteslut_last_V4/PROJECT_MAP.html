@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ByteSlut — Project Map</title>
+<style>
+/* ══════════════════════════════════════════════════
+   BYTESLUT PROJECT MAP
+   A complete visual guide to the entire codebase.
+   This file has NO dependencies — pure HTML + CSS.
+   Open it in any browser, no server needed.
+   ══════════════════════════════════════════════════ */
+
+:root {
+  --bg:     #0d0d0d;
+  --bg2:    #141414;
+  --bg3:    #1c1c1c;
+  --border: #2a2a2a;
+  --accent: #ff4444;
+  --cyan:   #22d3ee;
+  --green:  #4ade80;
+  --yellow: #fbbf24;
+  --purple: #a78bfa;
+  --blue:   #60a5fa;
+  --text:   #e8e8e8;
+  --muted:  #888;
+  --dim:    #444;
+  --font:   'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Typography ── */
+h1 { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+h2 { font-size: 16px; font-weight: 700; color: var(--text); margin: 28px 0 12px; }
+h3 { font-size: 13px; font-weight: 700; color: var(--cyan); margin: 14px 0 6px; }
+p  { font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.7; }
+code { background: var(--bg3); padding: 1px 5px; border-radius: 3px; color: var(--cyan); font-size: 11px; }
+
+/* ── Section boxes ── */
+.section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── File cards ── */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.file-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.file-name {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.file-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.file-card.c-accent { border-left: 3px solid var(--accent); }
+.file-card.c-cyan   { border-left: 3px solid var(--cyan); }
+.file-card.c-green  { border-left: 3px solid var(--green); }
+.file-card.c-yellow { border-left: 3px solid var(--yellow); }
+.file-card.c-purple { border-left: 3px solid var(--purple); }
+.file-card.c-blue   { border-left: 3px solid var(--blue); }
+
+/* ── Flow arrows ── */
+.flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.flow-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.flow-box.accent { border-color: var(--accent); color: var(--accent); }
+.flow-box.cyan   { border-color: var(--cyan);   color: var(--cyan); }
+.flow-box.green  { border-color: var(--green);  color: var(--green); }
+.flow-box.yellow { border-color: var(--yellow); color: var(--yellow); }
+.flow-box.purple { border-color: var(--purple); color: var(--purple); }
+.flow-arrow { color: var(--dim); font-size: 14px; }
+
+/* ── Table ── */
+.map-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 8px;
+}
+.map-table th {
+  text-align: left;
+  padding: 7px 10px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.map-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--bg3);
+  vertical-align: top;
+}
+.map-table td:first-child { color: var(--cyan); font-weight: 600; white-space: nowrap; }
+
+/* ── Badges ── */
+.tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+.tag-green  { background: rgba(74,222,128,.12);  color: var(--green); }
+.tag-yellow { background: rgba(251,191,36,.12);  color: var(--yellow); }
+.tag-blue   { background: rgba(96,165,250,.12);  color: var(--blue); }
+.tag-accent { background: rgba(255,68,68,.12);   color: var(--accent); }
+.tag-purple { background: rgba(167,139,250,.12); color: var(--purple); }
+
+/* ── Grid ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:900px) { .grid2,.grid3 { grid-template-columns: 1fr; } }
+
+/* ── Header bar ── */
+.header-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.header-meta { font-size: 11px; color: var(--muted); }
+
+/* ── Divider ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* ── Callout boxes ── */
+.callout {
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 11px;
+  margin: 10px 0;
+  line-height: 1.7;
+}
+.callout-yellow { background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.2); color: var(--yellow); }
+.callout-green  { background: rgba(74,222,128,.06);  border: 1px solid rgba(74,222,128,.2);  color: var(--green); }
+.callout-blue   { background: rgba(96,165,250,.06);  border: 1px solid rgba(96,165,250,.2);  color: var(--blue); }
+.callout-accent { background: rgba(255,68,68,.06);   border: 1px solid rgba(255,68,68,.2);   color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+     ══════════════════════════════════════ -->
+<div class="header-bar">
+  <div>
+    <h1>ByteSlut</h1>
+    <p style="margin:0;color:var(--muted)">Complete project map — everything you need to understand, modify, or extend the tool</p>
+  </div>
+  <div class="header-meta">
+    <div>CLI command: <code>byteslut</code></div>
+    <div>Port: <code>6969</code></div>
+    <div>Data: <code>~/.local/share/byteslut/</code></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     WHAT IS BYTESLUT?
+     ══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">What is ByteSlut?</div>
+  <div class="grid2">
+    <div>
+      <p>ByteSlut is a <strong style="color:var(--text)">local system monitor</strong> for Arch Linux. It runs silently in the background, collects data about how you use your computer, and shows it all in a web dashboard.</p>
+      <p>Everything runs on <strong style="color:var(--text)">your machine only</strong>. No cloud. No telemetry. No accounts. Your data stays in a SQLite file on your drive.</p>
+      <p>Type <code>byteslut</code> in your terminal → dashboard opens in browser.</p>
+    </div>
+    <div>
+      <div class="callout callout-green">
+        <strong>What it tracks:</strong> screen time, active time, per-app usage (hourly), browser history + YouTube titles, terminal commands + exit codes, CPU/RAM/temperature, network up/down, battery health, keystrokes + mouse, notifications, pacman packages
+      </div>
+      <div class="callout callout-blue" style="margin-top:8px">
+        <strong>What it does NOT do:</strong> send data anywhere, record which keys you pressed, take screenshots, require root access, slow down your system (uses &lt;1% CPU)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HOW IT WORKS — ARCHITECTURE FLOW
+     ══════════════════════════════════════ -->
+<h2>Architecture Flow</h2>
+<div class="section">
+  <div class="section-title">Data flow — from your computer to your browser</div>
+
+  <div class="flow">
+    <div class="flow-box accent">Your computer<br><small style="color:var(--muted)">(Hyprland, apps, keyboard)</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box cyan">Daemon<br><small style="color:var(--muted)">(11 collector threads)</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box yellow">BatchWriter<br><small style="color:var(--muted)">(flushes every 30s)</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box green">SQLite DB<br><small style="color:var(--muted)">(~/.local/share/byteslut/)</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box purple">Flask web server<br><small style="color:var(--muted)">(port 6969)</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box accent">Your browser<br><small style="color:var(--muted)">(dashboard)</small></div>
+  </div>
+
+  <p style="margin-top:10px">The daemon and web server are separate processes. The daemon collects data. The web server reads it. You can stop the web server and the daemon keeps collecting.</p>
+</div>
+
+<!-- ══════════════════════════════════════
+     FILE STRUCTURE
+     ══════════════════════════════════════ -->
+<h2>File Structure</h2>
+<div class="section">
+  <div class="section-title">Every file and what it does</div>
+
+  <div class="file-grid">
+    <!-- Root files -->
+    <div class="file-card c-accent">
+      <div class="file-name">install.sh</div>
+      <div class="file-desc">First-time setup. Installs Python deps, adds you to 'input' group, creates systemd service, adds shell alias, patches hyprland.conf to pass env vars to systemd.</div>
+    </div>
+    <div class="file-card c-accent">
+      <div class="file-name">update.sh</div>
+      <div class="file-desc">Safe update script. Backs up config, stops daemon, copies new files, merges config (keeps your settings), runs DB migrations, restarts daemon.</div>
+    </div>
+    <div class="file-card c-accent">
+      <div class="file-name">uninstall.sh</div>
+      <div class="file-desc">Removes daemon, service, aliases, hooks. Keeps your database by default. Use --purge to delete everything.</div>
+    </div>
+    <div class="file-card c-yellow">
+      <div class="file-name">config/settings.json</div>
+      <div class="file-desc">All user settings. App name, CLI command, port, collection interval, privacy toggles, daily report time/thresholds, productivity app categories.</div>
+    </div>
+    <div class="file-card c-yellow">
+      <div class="file-name">requirements.txt</div>
+      <div class="file-desc">Python dependencies: flask, psutil, dbus-python, PyGObject. Install with: pip install --break-system-packages -r requirements.txt</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DAEMON FILES
+     ══════════════════════════════════════ -->
+<h2>Daemon — Background Collector</h2>
+<p>The daemon runs as a systemd user service. It starts all collector threads and manages the database. You never run it directly — systemd handles it.</p>
+
+<div class="grid2">
+  <div class="section">
+    <div class="section-title">Core daemon files</div>
+    <div class="file-card c-cyan" style="margin-bottom:8px">
+      <div class="file-name">daemon/main.py</div>
+      <div class="file-desc">Entry point. Starts all collector threads. Handles SIGTERM/SIGINT for clean shutdown. Health monitor loop checks if any thread died and logs it.</div>
+    </div>
+    <div class="file-card c-cyan" style="margin-bottom:8px">
+      <div class="file-name">daemon/db.py</div>
+      <div class="file-desc">
+        Database layer. Three key things:<br>
+        1. <code>get_connection()</code> — SQLite with WAL mode<br>
+        2. <code>initialize_database()</code> — creates all 14 tables<br>
+        3. <code>BatchWriter</code> — collects records in RAM, flushes to SQLite every 30s
+      </div>
+    </div>
+    <div class="file-card c-cyan">
+      <div class="file-name">daemon/daily_report.py</div>
+      <div class="file-desc">Fires at 18:30 (configurable) to open the dashboard. Waits until system is relaxed (CPU &lt;30%, temp not rising). Detects your terminal emulator (kitty, alacritty, foot…).</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">How BatchWriter works (important)</div>
+    <p>Writing to disk 500 times per second stresses old hardware. BatchWriter solves this:</p>
+    <div class="flow" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <div class="flow-box cyan" style="font-size:10px">Collector calls batch_writer.add("table", data)</div>
+      <div class="flow-arrow">↓ (stored in RAM list — instant, no disk)</div>
+      <div class="flow-box yellow" style="font-size:10px">Every 30 seconds: flush() is called</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box green" style="font-size:10px">All pending records written to SQLite in ONE transaction</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-box purple" style="font-size:10px">List cleared, ready for next 30s batch</div>
+    </div>
+    <p style="margin-top:8px">Result: ~2 disk writes per minute instead of ~500. Old SSDs and HDDs both benefit.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     COLLECTORS
+     ══════════════════════════════════════ -->
+<h2>Collectors — One File Per Feature</h2>
+<p>Each collector is completely self-contained in its own file. To update notification tracking, edit only <code>notifications.py</code>. Nothing else breaks.</p>
+
+<div class="file-grid">
+  <div class="file-card c-green">
+    <div class="file-name">collectors/session.py</div>
+    <div class="file-desc">
+      Tracks screen time sessions. One session = lid open, not suspended.<br>
+      <span class="tag tag-green">DBus</span> PrepareForSleep → instant suspend detect<br>
+      <span class="tag tag-yellow">Fallback</span> Clock-jump: if heartbeat gap &gt;300s = suspend<br>
+      <strong style="color:var(--accent)">KEY BUG FIXED:</strong> SUSPEND_GAP must be &gt;60s (heartbeat interval)
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/apps.py</div>
+    <div class="file-desc">
+      Tracks active window every 2s. Polls /proc for background apps every 10s.<br>
+      <span class="tag tag-blue">Hyprland</span> hyprctl activewindow -j<br>
+      <span class="tag tag-blue">Sway</span> swaymsg -t get_tree<br>
+      <span class="tag tag-blue">X11</span> xdotool getactivewindow<br>
+      <strong style="color:var(--yellow)">IMPORTANT:</strong> Injects env vars from /proc/$(pgrep Hyprland)/environ so systemd service can find Hyprland socket without HYPRLAND_INSTANCE_SIGNATURE being set.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/cpu_ram.py</div>
+    <div class="file-desc">
+      Collects CPU%, RAM%, swap%, disk delta, temperatures every 30s.<br>
+      Temps from /sys/class/thermal/thermal_zone*/temp (millidegrees).<br>
+      Writes temperature_daily (min/max/avg) on EVERY sample so dashboard always shows current values.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/browser.py</div>
+    <div class="file-desc">
+      Reads browser SQLite history files directly (no extensions needed).<br>
+      <span class="tag tag-blue">Brave</span> ~/.config/BraveSoftware/ + Flatpak path<br>
+      <span class="tag tag-blue">Firefox</span> ~/.mozilla/firefox/ + Flatpak path<br>
+      Copies file to /tmp/ before reading (browser locks the live file).<br>
+      Strips localhost/127.0.0.1 from results.<br>
+      YouTube titles extracted from page title (removes " - YouTube" suffix).
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/notifications.py</div>
+    <div class="file-desc">
+      Listens on DBus org.freedesktop.Notifications.<br>
+      Requires: <code>sudo pacman -S python-dbus python-gobject</code><br>
+      Fallback: reads swaync's JSON cache file if DBus unavailable.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/commands.py</div>
+    <div class="file-desc">
+      Installs hooks into ~/.bashrc and ~/.zshrc.<br>
+      Hook logs: TIMESTAMP|EXIT_CODE|PWD|DURATION|COMMAND to cmd_log.txt<br>
+      Reads cmd_log.txt every 5s for new entries.<br>
+      Imports existing bash/zsh history on first run.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/network.py</div>
+    <div class="file-desc">
+      Reads /proc/net/dev every 60s (cumulative counters → delta).<br>
+      Per-app attribution: distributes total bytes across apps with active TCP connections (approximate).
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/battery.py</div>
+    <div class="file-desc">
+      Reads /sys/class/power_supply/BAT0/ every 5 minutes.<br>
+      Health% = (energy_full / energy_full_design) × 100<br>
+      Tracks charge cycles if battery exposes cycle_count.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/packages.py</div>
+    <div class="file-desc">
+      Reads /var/log/pacman.log every 5 minutes.<br>
+      Parses: [TIMESTAMP] [ALPM] installed/removed/upgraded PACKAGE (VERSION)<br>
+      Tracks file position so only new lines are read.
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/input_tracking.py</div>
+    <div class="file-desc">
+      Reads raw binary events from /dev/input/event* files.<br>
+      Requires: <code>sudo usermod -aG input $USER</code> + logout/login.<br>
+      Counts keystrokes, mouse clicks, scroll events, mouse distance.<br>
+      WPM = (keystrokes in last 60s) / 5
+    </div>
+  </div>
+  <div class="file-card c-green">
+    <div class="file-name">collectors/productivity.py</div>
+    <div class="file-desc">
+      Context-aware scoring (not just app name):<br>
+      • YouTube + "Tutorial" in title → work<br>
+      • YouTube + "Official Video" → entertainment<br>
+      • github.com → always work<br>
+      • bash/python3 scripts → neutral (never penalized)<br>
+      Score = (work + comm×0.5 + other×0.6) / total × 100
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DATABASE TABLES
+     ══════════════════════════════════════ -->
+<h2>Database — 14 Tables</h2>
+<p>SQLite file at <code>~/.local/share/byteslut/byteslut.db</code>. WAL mode = concurrent reads + writes. Safe to inspect with <code>sqlite3 ~/.local/share/byteslut/byteslut.db</code>.</p>
+
+<div class="section">
+  <table class="map-table">
+    <thead>
+      <tr><th>Table</th><th>What it stores</th><th>Key columns</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>sessions</td><td>One row per uninterrupted computer session (lid open to lid close)</td><td>start_time, end_time, duration_seconds, idle_seconds</td></tr>
+      <tr><td>app_usage</td><td>Time spent in each app per day. foreground = focused, background = running</td><td>date, app_name, foreground_seconds, background_seconds, is_flatpak</td></tr>
+      <tr><td>system_stats</td><td>CPU%, RAM%, disk I/O, temperatures — one row every 30s</td><td>cpu_percent, ram_percent, cpu_temp, gpu_temp</td></tr>
+      <tr><td>temperature_daily</td><td>Daily min/max/avg temperature summary — authoritative source for temp widgets</td><td>date, cpu_min, cpu_max, cpu_avg</td></tr>
+      <tr><td>browser_history</td><td>Every page visit. localhost/127.0.0.1 excluded. YouTube titles stored.</td><td>domain, title, youtube_title, visit_duration_seconds, is_youtube</td></tr>
+      <tr><td>notifications</td><td>Every notification received (needs dbus-python)</td><td>app_name, summary, body, action, urgency</td></tr>
+      <tr><td>commands</td><td>Every terminal command with exit code, PWD, duration</td><td>command, exit_code, working_directory, shell, is_sudo</td></tr>
+      <tr><td>network_usage</td><td>Upload/download per app per day</td><td>app_name, bytes_sent, bytes_received</td></tr>
+      <tr><td>battery_stats</td><td>Battery level, charging status, health</td><td>percent, is_plugged, capacity_full_mwh, capacity_design_mwh</td></tr>
+      <tr><td>packages</td><td>Pacman install/remove/upgrade history</td><td>action, package_name, old_version, new_version</td></tr>
+      <tr><td>input_stats</td><td>Keystrokes, mouse clicks, distance, WPM (needs input group)</td><td>keystrokes, mouse_clicks, mouse_distance_px, wpm_sample</td></tr>
+      <tr><td>productivity</td><td>Daily productivity score + work/entertainment split</td><td>productivity_score, work_seconds, entertainment_seconds, focus_streaks</td></tr>
+      <tr><td>app_registry</td><td>PERMANENT record of every app ever seen. Never deleted, even after app removed.</td><td>app_name, first_seen, last_seen, is_deleted, total_foreground_seconds</td></tr>
+      <tr><td>boot_times</td><td>How long each boot took</td><td>boot_duration_seconds, kernel_version</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════
+     WEB ROUTES
+     ══════════════════════════════════════ -->
+<h2>Web Routes — web/app.py</h2>
+<p>Flask server runs on port 6969. Every page is a function in web/app.py. The function queries SQLite and passes data to a Jinja2 template.</p>
+
+<div class="section">
+  <table class="map-table">
+    <thead>
+      <tr><th>Route</th><th>Template</th><th>Main purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>GET /</td><td>index.html</td><td>Dashboard — today's stats + hourly app usage chart</td></tr>
+      <tr><td>GET /timeline</td><td>timeline.html</td><td>App → tabs → notifications tree, newest first, expandable</td></tr>
+      <tr><td>GET /apps</td><td>apps.html</td><td>All apps with foreground time. System process toggle. Shows hourly chart per app.</td></tr>
+      <tr><td>GET /browser</td><td>browser.html</td><td>Browser history, top domains, YouTube videos (localhost excluded)</td></tr>
+      <tr><td>GET /commands</td><td>commands.html</td><td>Terminal history, newest first, load-more pagination</td></tr>
+      <tr><td>GET /hardware</td><td>hardware.html</td><td>CPU/RAM/temp charts, battery history</td></tr>
+      <tr><td>GET /input-stats</td><td>input_stats.html</td><td>Keystrokes, WPM trend, mouse distance</td></tr>
+      <tr><td>GET /notifications</td><td>notifications.html</td><td>Notification log (needs dbus-python)</td></tr>
+      <tr><td>GET /packages</td><td>packages.html</td><td>Pacman install/remove/upgrade history</td></tr>
+      <tr><td>GET /monthly</td><td>monthly.html</td><td>Month overview — daily chart, top apps, temps, packages</td></tr>
+      <tr><td>GET /yearly</td><td>yearly.html</td><td>Year overview — monthly bars, top apps</td></tr>
+      <tr><td>GET/POST /settings</td><td>settings.html</td><td>All config + daemon health diagnostics</td></tr>
+      <tr><td>GET /api/hourly-apps</td><td>—</td><td>JSON: dominant app per hour today (for dashboard chart)</td></tr>
+      <tr><td>GET /api/screen-time-week</td><td>—</td><td>JSON: daily screen time for last 7 days</td></tr>
+      <tr><td>GET /api/live-stats</td><td>—</td><td>JSON: current CPU%, RAM%, CPU temp (polled every 30s)</td></tr>
+      <tr><td>GET /api/timeline</td><td>—</td><td>JSON: full app+domain+notification hierarchy for a date</td></tr>
+      <tr><td>GET /api/dashboard-status</td><td>—</td><td>JSON: daemon health checks (app tracking, env vars, input group…)</td></tr>
+      <tr><td>POST /shutdown</td><td>—</td><td>Gracefully stop the web server (used by CLI --kill)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════
+     HOW TO ADD A NEW FEATURE
+     ══════════════════════════════════════ -->
+<h2>How to Add a New Feature</h2>
+<div class="grid2">
+  <div class="section">
+    <div class="section-title">Adding a new collector (e.g. track clipboard)</div>
+    <p><strong style="color:var(--text)">Step 1</strong> — Create <code>daemon/collectors/clipboard.py</code></p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px;line-height:1.6;overflow-x:auto">class ClipboardCollector:
+    def __init__(self, batch_writer):
+        self.batch_writer = batch_writer
+        self.running = False
+
+    def run(self):
+        self.running = True
+        while self.running:
+            # your logic here
+            self.batch_writer.add("clipboard", {
+                "content_hash": "abc123",
+                "length": 42
+            })
+            time.sleep(10)
+
+    def stop(self):
+        self.running = False</pre>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 2</strong> — Add a table in <code>daemon/db.py</code> inside <code>initialize_database()</code>:</p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px">cursor.execute("""
+    CREATE TABLE IF NOT EXISTS clipboard (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        content_hash TEXT,
+        length INTEGER
+    )
+""")</pre>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 3</strong> — Register in <code>daemon/main.py</code>:</p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px">from daemon.collectors.clipboard import ClipboardCollector
+collector_configs.append(
+    (ClipboardCollector, {"batch_writer": batch_writer})
+)</pre>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 4</strong> — Add a route in <code>web/app.py</code> + template in <code>web/templates/</code> + nav link in <code>base.html</code>.</p>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 5</strong> — Run <code>./update.sh --restart-only</code></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Adding a new dashboard page</div>
+    <p><strong style="color:var(--text)">Step 1</strong> — Add route in <code>web/app.py</code>:</p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px;line-height:1.6">@app.route("/mypage")
+def mypage():
+    data = query("SELECT * FROM mytable")
+    return render_template("mypage.html",
+        config=config,
+        data=data,
+        format_duration=format_duration,
+    )</pre>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 2</strong> — Create <code>web/templates/mypage.html</code>:</p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px;line-height:1.6">{&#37; extends "base.html" &#37;}
+{&#37; block content &#37;}
+&lt;div class="page-header"&gt;
+  &lt;h1&gt;My Page&lt;/h1&gt;
+&lt;/div&gt;
+{&#37; endblock &#37;}
+
+{&#37; block scripts &#37;}
+&lt;script&gt;
+  // page-specific JavaScript
+&lt;/script&gt;
+{&#37; endblock &#37;}</pre>
+
+    <p style="margin-top:10px"><strong style="color:var(--text)">Step 3</strong> — Add link in <code>web/templates/base.html</code> sidebar:</p>
+    <pre style="background:var(--bg3);padding:10px;border-radius:4px;font-size:10px">&lt;a href="/mypage" class="nav-link
+  {{ 'active' if request.endpoint == 'mypage' }}"&gt;
+  &lt;span class="nav-icon"&gt;◈&lt;/span&gt; My Page
+&lt;/a&gt;</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     KNOWN ISSUES + FIXES
+     ══════════════════════════════════════ -->
+<h2>Known Issues and How to Fix Them</h2>
+<div class="section">
+  <table class="map-table">
+    <thead>
+      <tr><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Apps all show 0s</td>
+        <td>Systemd service doesn't inherit HYPRLAND_INSTANCE_SIGNATURE from your login session</td>
+        <td>Add to hyprland.conf: <code>exec-once = systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP DBUS_SESSION_BUS_ADDRESS</code></td>
+      </tr>
+      <tr>
+        <td>Screen time resets every ~2 minutes</td>
+        <td>SUSPEND_GAP_SECONDS was 30, heartbeat runs every 60s — false suspend triggers every tick</td>
+        <td>SUSPEND_GAP_SECONDS = 300 (5 minutes). Already fixed in v3+.</td>
+      </tr>
+      <tr>
+        <td>ByteSlut dashboard as top browser site</td>
+        <td>Browser history collector was tracking localhost:6969 visits</td>
+        <td>Localhost URLs now filtered in browser.py and all SQL queries. Fixed in v3+.</td>
+      </tr>
+      <tr>
+        <td>Same YouTube video appears twice</td>
+        <td>(2) Gulaab and Gulaab treated as different titles (notification count prefix)</td>
+        <td>SQL strips leading (N) prefix with GLOB before GROUP BY. Fixed in v3+.</td>
+      </tr>
+      <tr>
+        <td>Keystroke tracking not working</td>
+        <td>User not in 'input' group — /dev/input/event* not readable</td>
+        <td><code>sudo usermod -aG input $USER</code> then FULL logout + login (not just terminal restart)</td>
+      </tr>
+      <tr>
+        <td>Notifications not tracked</td>
+        <td>dbus-python not installed</td>
+        <td><code>sudo pacman -S python-dbus python-gobject</code> then restart daemon</td>
+      </tr>
+      <tr>
+        <td>Service doesn't autostart</td>
+        <td>graphical-session.target not activated by Hyprland</td>
+        <td>Service uses WantedBy=default.target. Also add import-environment to hyprland.conf.</td>
+      </tr>
+      <tr>
+        <td>System daemons in top apps</td>
+        <td>(sd-pam), accounts-daemon etc. leak through background tracking</td>
+        <td>is_system_process() filter in apps.py + SQL NOT IN/NOT LIKE filters in every query</td>
+      </tr>
+      <tr>
+        <td>Temperature shows different values on different pages</td>
+        <td>Dashboard queried system_stats (individual readings), hardware page queried temperature_daily</td>
+        <td>temperature_daily updated on every 30s sample. Dashboard queries temperature_daily as single source of truth.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════
+     CLI COMMANDS
+     ══════════════════════════════════════ -->
+<h2>CLI Commands</h2>
+<div class="section">
+  <table class="map-table">
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>byteslut</td><td>Start web server (if not running) + open dashboard in browser. Holds terminal — Ctrl+C stops it.</td></tr>
+      <tr><td>byteslut --background</td><td>Start web server detached (returns to terminal)</td></tr>
+      <tr><td>byteslut --kill</td><td>Kill background web server, free port 6969</td></tr>
+      <tr><td>byteslut --daemon</td><td>Start the background data collector</td></tr>
+      <tr><td>byteslut --stop</td><td>Stop the daemon</td></tr>
+      <tr><td>byteslut --status</td><td>Show daemon + web server + database status</td></tr>
+      <tr><td>byteslut --install</td><td>Re-run installation (safe to repeat)</td></tr>
+      <tr><td>byteslut --timeout 300</td><td>Auto-close dashboard after 5 minutes of no browser activity</td></tr>
+      <tr><td>systemctl --user start byteslut</td><td>Start daemon via systemd</td></tr>
+      <tr><td>systemctl --user stop byteslut</td><td>Stop daemon via systemd</td></tr>
+      <tr><td>systemctl --user status byteslut</td><td>Check if daemon is running</td></tr>
+      <tr><td>journalctl --user -u byteslut -f</td><td>Watch daemon logs live</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════
+     SETTINGS REFERENCE
+     ══════════════════════════════════════ -->
+<h2>settings.json Reference</h2>
+<div class="section">
+  <div class="callout callout-blue">Settings are saved in <code>config/settings.json</code>. Edit in the Settings page of the dashboard — changes take effect immediately for the web server. Daemon picks up changes on restart.</div>
+  <table class="map-table" style="margin-top:10px">
+    <thead><tr><th>Key</th><th>Default</th><th>What it controls</th></tr></thead>
+    <tbody>
+      <tr><td>app_name</td><td>"ByteSlut"</td><td>Displayed in browser tab and sidebar</td></tr>
+      <tr><td>cli_command</td><td>"byteslut"</td><td>The terminal command to open the dashboard. Changing this updates ~/.bashrc and ~/.zshrc aliases.</td></tr>
+      <tr><td>dashboard_port</td><td>6969</td><td>HTTP port for the web server</td></tr>
+      <tr><td>collection_interval_seconds</td><td>30</td><td>How often system stats (CPU/RAM/temp) are collected. Min 10s.</td></tr>
+      <tr><td>idle_threshold_seconds</td><td>300</td><td>Seconds of no input before counted as "idle"</td></tr>
+      <tr><td>privacy.track_keystrokes</td><td>true</td><td>Enable/disable InputCollector</td></tr>
+      <tr><td>privacy.track_browser_history</td><td>true</td><td>Enable/disable BrowserCollector</td></tr>
+      <tr><td>privacy.track_notifications</td><td>true</td><td>Enable/disable NotificationCollector</td></tr>
+      <tr><td>privacy.track_commands</td><td>true</td><td>Enable/disable CommandCollector + shell hooks</td></tr>
+      <tr><td>daily_report.enabled</td><td>true</td><td>Auto-open dashboard at set time</td></tr>
+      <tr><td>daily_report.time</td><td>"18:30"</td><td>When to open the daily report</td></tr>
+      <tr><td>daily_report.delay_if_cpu_above_percent</td><td>30</td><td>Delay if system is this busy</td></tr>
+      <tr><td>daily_report.delay_if_temp_above_celsius</td><td>75</td><td>Delay if temp is actively rising above this</td></tr>
+      <tr><td>daily_report.max_delay_minutes</td><td>60</td><td>Give up delaying and open anyway after this long</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════
+     QUICK REFERENCE
+     ══════════════════════════════════════ -->
+<h2>Quick Reference</h2>
+<div class="grid3">
+  <div class="callout callout-yellow">
+    <strong>Data directory:</strong><br>
+    <code>~/.local/share/byteslut/</code><br><br>
+    <strong>Database:</strong><br>
+    <code>byteslut.db</code><br><br>
+    <strong>Logs:</strong><br>
+    <code>logs/daemon.log</code><br><br>
+    <strong>Command log:</strong><br>
+    <code>cmd_log.txt</code>
+  </div>
+  <div class="callout callout-green">
+    <strong>Required system packages:</strong><br>
+    <code>python-dbus</code> (notifications)<br>
+    <code>python-gobject</code> (DBus loop)<br>
+    <code>xprintidle</code> (X11 idle, optional)<br><br>
+    <strong>Required pip packages:</strong><br>
+    <code>flask psutil dbus-python PyGObject</code><br><br>
+    <strong>Required groups:</strong><br>
+    <code>input</code> (for keystroke tracking)
+  </div>
+  <div class="callout callout-blue">
+    <strong>Systemd service:</strong><br>
+    <code>~/.config/systemd/user/byteslut.service</code><br><br>
+    <strong>Shell hooks in:</strong><br>
+    <code>~/.bashrc</code> and <code>~/.zshrc</code><br><br>
+    <strong>Hyprland config line:</strong><br>
+    <code style="font-size:9px">exec-once = systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP DBUS_SESSION_BUS_ADDRESS</code>
+  </div>
+</div>
+
+<hr>
+<p style="text-align:center;color:var(--dim);font-size:11px;padding-bottom:20px">
+  ByteSlut Project Map — open this file locally: no server needed, pure HTML
+</p>
+
+</body>
+</html>

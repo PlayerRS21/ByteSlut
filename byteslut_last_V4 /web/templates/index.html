@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Today's Overview</h1>
+    <div class="page-desc">{{ today }} — live data, refreshes every 30s</div>
+  </div>
+  <div class="flex items-center gap8">
+    <div class="live-dot"></div>
+    <span class="text-xs text-muted">Live</span>
+  </div>
+</div>
+
+<!-- 4 stat cards -->
+<div class="g4 mb">
+  <div class="card card-red">
+    <div class="stat">
+      <div class="stat-lbl">Screen Time</div>
+      <div class="stat-val c-accent">{{ format_duration(screen_time.total or 0) }}</div>
+      <div class="stat-sub">{{ screen_time.session_count or 0 }} sessions · avg {{ format_duration(avg_screen_time.avg_seconds or 0) }}/day</div>
+      <div class="bar"><div class="bar-fill" style="width:{{ [((screen_time.total or 0)/43200*100),100]|min|int }}%"></div></div>
+    </div>
+  </div>
+  <div class="card card-green">
+    <div class="stat">
+      <div class="stat-lbl">Active Time</div>
+      <div class="stat-val c-green">{{ format_duration(active_seconds or 0) }}</div>
+      <div class="stat-sub">
+        {% if screen_time.total %}{{ '%.0f'%((active_seconds or 0)/(screen_time.total)*100) }}% active ratio
+        {% else %}non-idle time{% endif %}
+      </div>
+      <div class="bar"><div class="bar-fill green" style="width:{{ [((active_seconds or 0)/43200*100),100]|min|int }}%"></div></div>
+    </div>
+  </div>
+  <div class="card card-blue">
+    <div class="stat">
+      <div class="stat-lbl">CPU Now</div>
+      <div class="stat-val c-blue" data-live="cpu">{{ '%.1f'%(system_now.cpu_percent or 0) }}%</div>
+      <div class="stat-sub">RAM <span data-live="ram">{{ '%.1f'%(system_now.ram_percent or 0) }}%</span></div>
+      <div class="bar"><div class="bar-fill blue" style="width:{{ (system_now.cpu_percent or 0)|int }}%"></div></div>
+    </div>
+  </div>
+  <div class="card card-yellow">
+    <div class="stat">
+      <div class="stat-lbl">CPU Temp</div>
+      <div class="stat-val {{ 'c-accent' if (system_now.cpu_temp or 0)>80 else ('c-yellow' if (system_now.cpu_temp or 0)>65 else 'c-green') }}" data-live="temp">
+        {{ '%.1f'%(system_now.cpu_temp or 0) }}°C
+      </div>
+      <div class="stat-sub">Min {{ '%.0f'%(temps_today.cpu_min or 0) }}° / Max {{ '%.0f'%(temps_today.cpu_max or 0) }}°</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN: Hourly app usage chart -->
+<div class="card mb">
+  <div class="card-header">
+    <span>App Usage — Which App at Which Hour</span>
+    <span class="text-xs text-muted">each bar = 1 hour, colored by dominant app</span>
+  </div>
+  <div class="card-body">
+    <div class="chart h220"><canvas id="hourlyChart"></canvas></div>
+    <div id="appLegend" class="flex mt8" style="gap:10px;flex-wrap:wrap;font-size:10px;color:var(--muted)"></div>
+  </div>
+</div>
+
+<!-- Row 3: Battery + Network + Productivity -->
+<div class="g3 mb">
+  <div class="card">
+    <div class="card-header">Battery</div>
+    <div class="card-body">
+      {% if battery and battery.percent is not none %}
+      {% set p = battery.percent|int %}
+      <div class="flex items-center gap8">
+        <div class="stat-val {{ 'c-accent' if p<20 else ('c-yellow' if p<50 else 'c-green') }}" style="font-size:26px">{{ p }}%</div>
+        <div class="text-sm text-muted">{{ '⚡ Charging' if battery.is_plugged else '🔋 On battery' }}</div>
+      </div>
+      <div class="bar mt8"><div class="bar-fill {{ 'green' if p>50 else 'yellow' }}" style="width:{{ p }}%"></div></div>
+      {% else %}
+      <div class="empty"><div class="empty-txt text-muted">No battery detected</div></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Network Today</div>
+    <div class="card-body">
+      <div class="g2" style="gap:8px">
+        <div>
+          <div class="text-xs text-muted mb8">↓ Downloaded</div>
+          <div class="stat-val c-blue" style="font-size:18px">{{ format_bytes(network_today.total_recv or 0) }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-muted mb8">↑ Uploaded</div>
+          <div class="stat-val c-green" style="font-size:18px">{{ format_bytes(network_today.total_sent or 0) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Productivity</div>
+    <div class="card-body">
+      {% if productivity and productivity.productivity_score is not none %}
+      {% set sc = productivity.productivity_score|int %}
+      <div class="flex items-center gap8">
+        <div class="stat-val {{ 'c-green' if sc>70 else ('c-yellow' if sc>40 else 'c-accent') }}" style="font-size:32px">{{ sc }}</div>
+        <div>
+          <div class="text-xs text-muted">/100</div>
+          <div class="text-xs text-muted mt4">{{ productivity.dominant_category or '—' }}</div>
+          <div class="text-xs text-muted mt4">{{ productivity.sample_count or 0 }} samples</div>
+        </div>
+      </div>
+      <div class="bar mt8"><div class="bar-fill {{ 'green' if sc>70 else 'yellow' }}" style="width:{{ sc }}%"></div></div>
+      {% else %}
+      <div class="text-muted text-sm">Calculating…<br><span class="text-xs text-dim">needs app tracking data</span></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* App color map — consistent colors per app name */
+const APP_COLORS = {
+  brave:'#fb923c', firefox:'#f97316', chrome:'#eab308',
+  kitty:'#4ade80', alacritty:'#4ade80', foot:'#4ade80', wezterm:'#22d3ee',
+  nvim:'#60a5fa', vim:'#3b82f6', code:'#007acc', emacs:'#818cf8',
+  spotify:'#1db954', telegram:'#0088cc', discord:'#5865f2',
+  thunar:'#94a3b8', nautilus:'#94a3b8', dolphin:'#94a3b8',
+};
+const PAL = ['#a78bfa','#f87171','#34d399','#fbbf24','#f472b6','#22d3ee'];
+const colorCache = {};
+let palIdx = 0;
+
+function appColor(name) {
+  if (!name) return '#334155';
+  const k = name.toLowerCase();
+  for (const [pat, col] of Object.entries(APP_COLORS)) {
+    if (k.includes(pat)) return col;
+  }
+  if (!colorCache[k]) { colorCache[k] = PAL[palIdx++ % PAL.length]; }
+  return colorCache[k];
+}
+
+(async function loadHourly() {
+  const canvas = document.getElementById('hourlyChart');
+  if (!canvas) return;
+
+  let data = [];
+  try { data = await (await fetch('/api/hourly-apps')).json(); }
+  catch(e) {}
+
+  if (!data.length) {
+    canvas.parentElement.innerHTML =
+      '<div class="empty"><div class="empty-icon">⬡</div>' +
+      '<div class="empty-txt">No app activity today</div>' +
+      '<div class="empty-hint">Make sure the daemon is running — check Settings → Daemon Health</div></div>';
+    return;
+  }
+
+  /* Fill all 24 hours, empty ones get 0 */
+  const byHour = {};
+  data.forEach(d => { byHour[d.hour] = d; });
+
+  const labels = [];
+  const values = [];
+  const bgs    = [];
+  const borders= [];
+
+  for (let h = 0; h < 24; h++) {
+    const label = h === 0 ? '12am' : h < 12 ? h+'am' : h === 12 ? '12pm' : (h-12)+'pm';
+    labels.push(label);
+    const entry = byHour[h];
+    values.push(entry ? entry.seconds : 0);
+    const col = entry ? appColor(entry.app) : '#1c1c1c';
+    bgs.push(col + '99');
+    borders.push(col);
+  }
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ data:values, backgroundColor:bgs, borderColor:borders, borderWidth:1, borderRadius:3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: items => labels[items[0].dataIndex],
+          label: ctx => {
+            const e = byHour[ctx.dataIndex];
+            return e ? e.app + ': ' + fmtDur(e.seconds) : 'No activity';
+          }
+        }}
+      },
+      scales: {
+        x: { grid:{display:false} },
+        y: { beginAtZero:true, max:3600, ticks:{ callback: v => v===3600?'1h':v===1800?'30m':v===0?'0':'' } }
+      }
+    }
+  });
+
+  /* Legend */
+  const apps = [...new Set(data.map(d=>d.app))];
+  const legend = document.getElementById('appLegend');
+  if (legend) {
+    legend.innerHTML = apps.map(a =>
+      `<span style="display:flex;align-items:center;gap:4px">` +
+      `<span style="width:9px;height:9px;border-radius:2px;background:${appColor(a)};flex-shrink:0"></span>${a}</span>`
+    ).join('');
+  }
+})();
+</script>
+{% endblock %}

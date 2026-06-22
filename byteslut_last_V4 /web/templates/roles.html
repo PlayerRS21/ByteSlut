@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Day <span style="color:var(--accent)">Roles</span></h1>
+    <div class="page-desc">What kind of day did you have? One role per day, detected from your actual usage</div>
+  </div>
+  <button onclick="detectToday()" class="btn" style="padding:6px 14px;font-size:11px">
+    ↻ Detect Today
+  </button>
+</div>
+
+{% if not all_roles %}
+<div class="card mb"><div class="card-body">
+  <div class="empty">
+    <div class="empty-icon">◈</div>
+    <div class="empty-txt">No role data yet</div>
+    <div class="empty-hint">
+      Role detection needs at least one day of productivity data.<br>
+      Click "Detect Today" above to analyse today.
+    </div>
+  </div>
+</div></div>
+{% else %}
+
+<!-- Summary row -->
+<div class="g4 mb">
+  <div class="card card-red"><div class="stat">
+    <div class="stat-lbl">Days Tracked</div>
+    <div class="stat-val c-accent">{{ all_roles|length }}</div>
+    <div class="stat-sub">roles detected</div>
+  </div></div>
+  <div class="card card-blue"><div class="stat">
+    <div class="stat-lbl">Most Common Role</div>
+    {% if role_counts %}
+    <div class="stat-val c-blue" style="font-size:15px">{{ role_counts[0][0] }}</div>
+    <div class="stat-sub">{{ role_counts[0][1] }} day{{ 's' if role_counts[0][1]!=1 else '' }}</div>
+    {% else %}<div class="stat-val c-blue">—</div>{% endif %}
+  </div></div>
+  <div class="card card-green"><div class="stat">
+    <div class="stat-lbl">Best Performing Role</div>
+    {% if role_avg_scores %}
+    {% set best_role = role_avg_scores|dictsort(by='value',reverse=True)|first %}
+    <div class="stat-val c-green" style="font-size:14px">{{ best_role[0] }}</div>
+    <div class="stat-sub">avg {{ best_role[1] }}/100</div>
+    {% else %}<div class="stat-val c-green">—</div>{% endif %}
+  </div></div>
+  <div class="card card-yellow"><div class="stat">
+    <div class="stat-lbl">Unique Roles</div>
+    <div class="stat-val c-yellow">{{ role_counts|length }}</div>
+    <div class="stat-sub">of 14 possible</div>
+  </div></div>
+</div>
+
+<!-- Role frequency chart -->
+{% if role_counts %}
+<div class="card mb">
+  <div class="card-header">Role Distribution</div>
+  <div class="card-body">
+    {% set max_count = role_counts[0][1] %}
+    {% for name, count in role_counts %}
+    <div style="margin-bottom:8px">
+      <div class="flex justify-between mb4">
+        <span class="text-sm">{{ name }}</span>
+        <span class="text-xs text-muted">{{ count }} day{{ 's' if count!=1 else '' }}</span>
+      </div>
+      <div class="bar">
+        <div class="bar-fill" style="width:{{ [((count/max_count)*100)|int,100]|min }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Day-by-day role list -->
+<div class="card">
+  <div class="card-header">Daily Roles — Newest First</div>
+  <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr>
+        <th>Date</th><th>Role</th><th>Description</th>
+        <th>Productivity</th><th>Screen Time</th>
+        <th>Top App</th><th>Runner-ups</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for r in all_roles %}
+        {% set f = r.features_parsed %}
+        <tr>
+          <td class="text-muted" style="white-space:nowrap">{{ r.date }}</td>
+          <td>
+            <span class="{{ r.color or 'text-muted' }}" style="font-size:13px;font-weight:700">
+              {{ r.emoji or '?' }} {{ r.role_name or 'Unknown' }}
+            </span>
+          </td>
+          <td class="text-muted text-xs" style="max-width:200px">{{ r.description or '' }}</td>
+          <td>
+            {% set sc = (f.productivity_score or 0)|int %}
+            <span class="{{ 'c-green' if sc>70 else ('c-yellow' if sc>40 else 'c-accent') }}">
+              {{ sc }}/100
+            </span>
+          </td>
+          <td class="text-muted text-xs">{{ '%.1f'%(f.screen_time_h or 0) }}h</td>
+          <td class="text-muted text-xs">{{ f.top_app_name or '—' }}</td>
+          <td class="text-xs text-dim">
+            {% for alt in r.alternatives_parsed[:2] %}
+            {{ alt.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </td>
+          <td>
+            <button onclick="redetect('{{ r.date }}')"
+                    class="btn btn-ghost" style="padding:2px 8px;font-size:9px">
+              ↻
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endif %}
+
+<!-- Toast for detect feedback -->
+<div id="detectToast"
+     style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+            background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+            padding:10px 20px;border-radius:6px;font-size:12px;font-weight:600;
+            opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:999">
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function detectToday() {
+  showToast('Detecting today\'s role…');
+  try {
+    const r = await fetch('/api/detect-role', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({date: new Date().toISOString().split('T')[0]})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showToast(d.role.emoji + ' ' + d.role.role_name + ' — reloading…');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showToast('Error: ' + (d.error || 'unknown'));
+    }
+  } catch(e) {
+    showToast('Request failed');
+  }
+}
+
+async function redetect(dateStr) {
+  showToast('Re-detecting ' + dateStr + '…');
+  try {
+    const r = await fetch('/api/detect-role', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({date: dateStr})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showToast(d.role.emoji + ' ' + d.role.role_name);
+      setTimeout(() => location.reload(), 1200);
+    }
+  } catch(e) {}
+}
+
+function showToast(msg) {
+  const el = document.getElementById('detectToast');
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2500);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Focus <span style="color:var(--accent)">Breakdown</span></h1>
+    <div class="page-desc">Why you got your score — category breakdown, top domains, sites to label</div>
+  </div>
+</div>
+
+<div class="tabs">
+  {% for p,l in [('today','Today'),('week','Week'),('month','Month')] %}
+  <a href="/focus?period={{ p }}" class="tab{{ ' active' if period==p else '' }}">{{ l }}</a>
+  {% endfor %}
+</div>
+
+{% if not latest or not latest.productivity_score %}
+<div class="card mb"><div class="card-body">
+  <div class="empty">
+    <div class="empty-icon">◈</div>
+    <div class="empty-txt">No productivity data yet</div>
+    <div class="empty-hint">
+      The new ProductivityCollector samples your active window every 5 seconds.<br>
+      Data appears after a few minutes of use.
+    </div>
+  </div>
+</div></div>
+{% else %}
+
+<!-- Score + role row -->
+<div class="g4 mb">
+  {% set sc = latest.productivity_score|int %}
+  {% set sc_color = 'c-green' if sc>70 else ('c-yellow' if sc>40 else 'c-accent') %}
+  <div class="card card-red"><div class="stat">
+    <div class="stat-lbl">Score ({{ period }})</div>
+    <div class="stat-val {{ sc_color }}" style="font-size:32px">{{ sc }}</div>
+    <div class="stat-sub">/100 confidence-weighted</div>
+    <div class="bar mt8"><div class="bar-fill {{ 'green' if sc>70 else 'yellow' }}" style="width:{{ sc }}%"></div></div>
+  </div></div>
+  <div class="card card-blue"><div class="stat">
+    <div class="stat-lbl">Detected Role</div>
+    <div class="stat-val c-blue" style="font-size:18px">{{ latest.detected_role or 'unknown' }}</div>
+    <div class="stat-sub">{{ latest.sample_count or 0 }} samples · conf {{ '%.1f'%(latest.total_confidence or 0) }}</div>
+  </div></div>
+  <div class="card card-green"><div class="stat">
+    <div class="stat-lbl">Dominant Activity</div>
+    <div class="stat-val c-green" style="font-size:14px">{{ (latest.dominant_category or '—').replace('_',' ') }}</div>
+    <div class="stat-sub">most common this period</div>
+  </div></div>
+  <div class="card card-yellow"><div class="stat">
+    <div class="stat-lbl">Raw Weighted Score</div>
+    <div class="stat-val c-yellow">{{ '%.2f'%(latest.raw_score_weighted or 0) }}</div>
+    <div class="stat-sub">/10.0 pre-normalization</div>
+  </div></div>
+</div>
+
+<div class="g2 mb">
+
+  <!-- Category breakdown -->
+  <div class="card">
+    <div class="card-header">Activity Breakdown — What Drove Your Score</div>
+    <div class="card-body">
+      {% set cat_info = [
+        ('coding_editor',      'Code Editor',      'c-blue',   'Counts as 100% productive'),
+        ('terminal',           'Terminal',          'c-green',  'Counts as 100% productive'),
+        ('localhost_dev',      'Local Dev Server',  'c-green',  'Counts as 100% productive'),
+        ('ai_tool',            'AI Tool',           'c-purple', 'Counts as ~87% productive'),
+        ('learning_video',     'Learning Video',    'c-blue',   'Counts as ~87% productive'),
+        ('productive_site',    'Productive Site',   'c-green',  'Counts as ~67% productive'),
+        ('dev_tool',           'Dev Tool',          'c-blue',   'Counts as ~87% productive'),
+        ('writing_docs',       'Writing / Docs',    'c-blue',   'Counts as ~56% productive'),
+        ('work_comm',          'Work Comms',        'c-muted',  'Counts as 44% (neutral)'),
+        ('neutral',            'Unknown Site',      'c-muted',  'Counts as 44% (neutral, not penalized)'),
+        ('idle',               'Idle',              'c-muted',  'Counts as 44% (not penalized)'),
+        ('entertainment_app',  'Entertainment App', 'c-yellow', 'Counts as 33% (mild penalty)'),
+        ('entertainment_fg',   'Entertainment',     'c-accent', 'Counts as 11% (foreground penalty)'),
+        ('social_media',       'Social Media',      'c-accent', 'Counts as 0% productive'),
+      ] %}
+      {% set total_samples = latest.sample_count or 1 %}
+      {% set max_count = category_breakdown.values()|max if category_breakdown else 1 %}
+      {% for cat_key, cat_label, color, hint in cat_info %}
+      {% set count = category_breakdown.get(cat_key, 0) %}
+      {% if count > 0 %}
+      <div style="margin-bottom:10px">
+        <div class="flex justify-between mb4">
+          <div>
+            <span class="text-sm {{ color }}">{{ cat_label }}</span>
+            <span class="text-xs text-muted" style="margin-left:6px">{{ hint }}</span>
+          </div>
+          <span class="text-xs text-muted">{{ count }} samples · {{ '%.0f'%((count/total_samples)*100) }}%</span>
+        </div>
+        <div class="bar">
+          <div class="bar-fill {{ 'green' if 'productive' in cat_key or cat_key in ('coding_editor','terminal','localhost_dev','ai_tool','learning_video','dev_tool') else ('yellow' if 'entertainment_app' in cat_key else ('red' if 'entertainment_fg' in cat_key or 'social' in cat_key else '')) }}"
+               style="width:{{ [((count/max_count)*100)|int, 100]|min }}%"></div>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% if not category_breakdown %}
+      <div class="empty"><div class="empty-txt">No breakdown data</div></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Top domains + score trend -->
+  <div>
+    <div class="card mb">
+      <div class="card-header">Top Domains This Period</div>
+      <div class="card-body">
+        {% if top_domains %}
+        {% set max_d = top_domains.values()|max if top_domains else 1 %}
+        {% for domain, count in top_domains.items() %}
+        <div style="margin-bottom:8px">
+          <div class="flex justify-between mb4">
+            <span class="text-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">{{ domain }}</span>
+            <span class="text-xs text-muted">{{ count }} samples</span>
+          </div>
+          <div class="bar"><div class="bar-fill blue" style="width:{{ [((count/max_d)*100)|int,100]|min }}%"></div></div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty"><div class="empty-txt">No domain data</div></div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Score Trend</div>
+      <div class="card-body"><div class="chart h140"><canvas id="scoreChart"></canvas></div></div>
+    </div>
+  </div>
+
+</div>
+
+{% endif %}
+
+<!-- Sites to review -->
+{% if sites_to_review %}
+<div class="card mb">
+  <div class="card-header flex justify-between">
+    <span>Sites to Label <span class="text-xs text-muted" style="margin-left:6px">{{ sites_to_review|length }} unknown sites — label them to improve your score accuracy</span></span>
+  </div>
+  <div class="card-body">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+      These sites have been visited for more than 2 minutes but aren't classified yet.
+      Labelling them helps the system score you more accurately.
+      Unknown sites score as <strong style="color:var(--text)">neutral (50/100)</strong> — labelling won't change much unless you visit them a lot.
+    </div>
+    <div id="reviewList">
+      {% for domain, seconds in sites_to_review.items() %}
+      <div id="site-{{ loop.index }}" class="flex items-center gap8"
+           style="padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <div style="flex:1;min-width:120px">
+          <div class="text-sm">{{ domain }}</div>
+          <div class="text-xs text-muted">{{ format_duration(seconds|int) }} total</div>
+        </div>
+        <div class="flex gap8" style="flex-shrink:0">
+          <button onclick="labelSite('{{ domain }}','productive',{{ loop.index }})"
+                  class="btn" style="padding:4px 10px;font-size:10px;background:var(--green);border:none">
+            ✓ Productive
+          </button>
+          <button onclick="labelSite('{{ domain }}','neutral',{{ loop.index }})"
+                  class="btn btn-ghost" style="padding:4px 10px;font-size:10px">
+            — Neutral
+          </button>
+          <button onclick="labelSite('{{ domain }}','entertainment',{{ loop.index }})"
+                  class="btn" style="padding:4px 10px;font-size:10px;background:var(--red);border:none">
+            ✗ Entertainment
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Already-labeled sites -->
+{% if user_sites %}
+<div class="card">
+  <div class="card-header">Your Labeled Sites</div>
+  <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Domain</th><th>Your Label</th><th>Remove</th></tr></thead>
+      <tbody>
+        {% for domain, label in user_sites.items() %}
+        <tr id="labeled-{{ loop.index }}">
+          <td>{{ domain }}</td>
+          <td>
+            <span class="badge {{ 'b-green' if label=='productive' else ('b-red' if label=='entertainment' else 'b-blue') }}">
+              {{ label }}
+            </span>
+          </td>
+          <td>
+            <button onclick="removeSite('{{ domain }}',{{ loop.index }})"
+                    class="btn btn-ghost" style="padding:2px 8px;font-size:10px">
+              Remove
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if daily_scores %}
+const ds = {{ daily_scores|tojson }};
+rawLine('scoreChart',
+  ds.map(d => d.date.slice(5)),
+  [{label:'Score', data:ds.map(d => d.productivity_score||0), color:CA, fill:true}],
+  v => v + '/100'
+);
+{% endif %}
+
+async function labelSite(domain, label, idx) {
+  const row = document.getElementById(`site-${idx}`);
+  try {
+    const r = await fetch('/api/label-site', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({domain, label})
+    });
+    const d = await r.json();
+    if (d.ok && row) {
+      row.style.opacity = '0.3';
+      row.style.pointerEvents = 'none';
+      const lbl = row.querySelector('.text-sm');
+      if (lbl) lbl.textContent = `${domain} → ${label} ✓`;
+    }
+  } catch(e) {
+    alert('Failed to save label');
+  }
+}
+
+async function removeSite(domain, idx) {
+  /* Label as neutral to effectively remove custom scoring */
+  const row = document.getElementById(`labeled-${idx}`);
+  try {
+    /* Write empty string signals deletion — backend handles it */
+    const r = await fetch('/api/label-site', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({domain, label:'neutral'})
+    });
+    const d = await r.json();
+    if (d.ok && row) {
+      row.style.opacity = '0.3';
+      row.style.pointerEvents = 'none';
+    }
+  } catch(e) {}
+}
+</script>
+{% endblock %}

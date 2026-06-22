@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header"><h1>Settings</h1></div>
+{% if message %}<div class="alert-ok">✓ {{ message }}</div>{% endif %}
+<form method="POST">
+<div class="g2" style="gap:16px;align-items:start">
+  <!-- LEFT: config -->
+  <div>
+    <div class="card mb">
+      <div class="card-header">AI Coach API Key</div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-lbl">Anthropic API Key</label>
+          <input type="password" name="anthropic_api_key"
+                 value="{{ config.get('anthropic_api_key','') }}"
+                 placeholder="sk-ant-api03-..."
+                 class="field-input" autocomplete="off">
+          <div class="field-hint">
+            Required for the AI Coach page. Get a free key at
+            <span style="color:var(--blue)">console.anthropic.com</span>
+            → stored locally only, never sent anywhere except Anthropic.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb">
+      <div class="card-header">App Configuration</div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-lbl">App Name</label>
+          <input type="text" name="app_name" value="{{ config.app_name }}" class="field-input">
+        </div>
+        <div class="field">
+          <label class="field-lbl">CLI Command (alias in shell rc files)</label>
+          <input type="text" name="cli_command" value="{{ config.cli_command }}" class="field-input" style="color:var(--accent)">
+        </div>
+        <div class="g2" style="gap:10px">
+          <div class="field">
+            <label class="field-lbl">Dashboard Port</label>
+            <input type="number" name="dashboard_port" value="{{ config.dashboard_port }}" class="field-input">
+          </div>
+          <div class="field">
+            <label class="field-lbl">Collection Interval (s)</label>
+            <input type="number" name="collection_interval" value="{{ config.collection_interval_seconds }}" min="10" max="300" class="field-input">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card mb">
+      <div class="card-header">Privacy Controls</div>
+      <div class="card-body">
+        {% set priv=config.get('privacy',{}) %}
+        {% for key,lbl,hint in [
+          ('track_keystrokes','Track keystrokes & mouse','counts only — no keys stored'),
+          ('track_browser_history','Track browser history','reads local browser SQLite, localhost excluded'),
+          ('track_notifications','Track notifications','requires python-dbus python-gobject'),
+          ('track_commands','Track terminal commands','shell hook in ~/.bashrc and ~/.zshrc'),
+          ('track_typed_words','Store WPM word samples','off by default'),
+        ] %}
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer;padding:7px;border-radius:4px;transition:background .1s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+          <input type="checkbox" name="{{ key }}" {% if priv.get(key,True) %}checked{% endif %} style="margin-top:2px;accent-color:var(--accent);flex-shrink:0">
+          <div>
+            <div class="text-sm">{{ lbl }}</div>
+            <div class="text-xs text-muted mt4">{{ hint }}</div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card mb">
+      <div class="card-header">Daily Report</div>
+      <div class="card-body">
+        {% set rpt=config.get('daily_report',{}) %}
+        <div class="field">
+          <label class="toggle-wrap">
+            <label class="toggle"><input type="checkbox" name="report_enabled" {% if rpt.get('enabled',True) %}checked{% endif %}><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            Enable daily report at set time
+          </label>
+        </div>
+        <div class="g2" style="gap:10px">
+          <div class="field"><label class="field-lbl">Time</label><input type="time" name="report_time" value="{{ rpt.get('time','18:30') }}" class="field-input"></div>
+          <div class="field"><label class="field-lbl">Max delay (min)</label><input type="number" name="report_max_delay" value="{{ rpt.get('max_delay_minutes',60) }}" class="field-input"></div>
+          <div class="field"><label class="field-lbl">Delay if CPU above (%)</label><input type="number" name="report_cpu_threshold" value="{{ rpt.get('delay_if_cpu_above_percent',30) }}" class="field-input"></div>
+          <div class="field"><label class="field-lbl">Delay if temp above (°C)</label><input type="number" name="report_temp_threshold" value="{{ rpt.get('delay_if_temp_above_celsius',75) }}" class="field-input"></div>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn" style="width:100%;padding:10px">Save Settings</button>
+  </div>
+  <!-- RIGHT: db + health -->
+  <div>
+    <div class="card mb">
+      <div class="card-header">Database</div>
+      <div class="card-body">
+        {% for lbl,val in [('Size',db_size_mb~' MB'),('Location',db_path),('Since',oldest_date)] %}
+        <div class="flex justify-between" style="padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
+          <span class="text-muted">{{ lbl }}</span>
+          <span style="color:{{ 'var(--blue)' if lbl=='Location' else 'var(--text)' }};font-size:{{ '10px' if lbl=='Location' else '11px' }};max-width:200px;overflow:hidden;text-overflow:ellipsis">{{ val }}</span>
+        </div>
+        {% endfor %}
+        <div class="mt8">
+          {% for table,count in record_counts.items() %}
+          <div class="flex justify-between" style="padding:2px 0;font-size:10px">
+            <span class="text-dim">{{ table }}</span><span>{{ '{:,}'.format(count) }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE: Wipe Database -->
+    <div class="card mb" style="border-left:3px solid var(--red)">
+      <div class="card-header" style="color:var(--red)">⚠ Danger Zone — Wipe Database</div>
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:12px">
+          This permanently deletes ALL collected data — screen time, app usage,
+          browser history, commands, temperatures, everything.<br>
+          <strong style="color:var(--text)">The database schema is kept</strong> so the daemon can resume collecting immediately.
+        </div>
+
+        <!-- Step 1: Generate token -->
+        <div id="wipeStep1">
+          <button type="button" onclick="requestWipeToken()" class="btn btn-ghost"
+                  style="border-color:var(--red);color:var(--red);width:100%;padding:8px">
+            Generate confirmation code
+          </button>
+        </div>
+
+        <!-- Step 2: Enter token (hidden until generated) -->
+        <div id="wipeStep2" style="display:none">
+          <div style="background:var(--bg3);border:1px solid rgba(248,113,113,.3);border-radius:4px;padding:12px;margin-bottom:10px;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Type this code exactly to confirm wipe:</div>
+            <div id="wipeTokenDisplay" style="font-size:22px;font-weight:700;color:var(--red);letter-spacing:4px;font-family:var(--font)">——</div>
+          </div>
+          <div class="field">
+            <label class="field-lbl">Enter the code above</label>
+            <input type="text" id="wipeTokenInput" placeholder="Type code here…"
+                   class="field-input" style="text-transform:uppercase;letter-spacing:2px;text-align:center;font-size:14px"
+                   oninput="this.value=this.value.toUpperCase()"
+                   onkeydown="if(event.key==='Enter')confirmWipe()">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button type="button" onclick="confirmWipe()"
+                    class="btn" style="flex:1;background:var(--red);border-color:var(--red)">
+              Wipe All Data
+            </button>
+            <button type="button" onclick="cancelWipe()"
+                    class="btn btn-ghost" style="flex:0 0 auto">
+              Cancel
+            </button>
+          </div>
+          <div id="wipeError" style="display:none;color:var(--red);font-size:11px;margin-top:8px;text-align:center"></div>
+        </div>
+
+        <!-- Success message (hidden until wiped) -->
+        <div id="wipeSuccess" style="display:none;color:var(--green);font-size:11px;text-align:center;padding:10px">
+          ✓ Database wiped. <span id="wipeCount"></span> rows deleted. Daemon will resume collecting.
+        </div>
+      </div>
+    </div>
+    <div class="card mb">
+      <div class="card-header">Daemon Health</div>
+      <div id="healthPanel" style="padding:12px;font-size:11px;color:var(--muted)">Checking...</div>
+    </div>
+    <div class="card mb">
+      <div class="card-header">Quick Commands</div>
+      <div class="card-body">
+        {% for lbl,cmd in [('Open dashboard',config.cli_command),('Start daemon','systemctl --user start byteslut'),('Stop daemon','systemctl --user stop byteslut'),('Live logs','journalctl --user -u byteslut -f'),('Status','systemctl --user status byteslut')] %}
+        <div style="padding:5px 0;border-bottom:1px solid var(--border)">
+          <div class="text-xs text-dim mb4">{{ lbl }}</div>
+          <div class="c-blue text-xs">$ {{ cmd }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--yellow)">
+      <div class="card-header" style="color:var(--yellow)">⚠ Service not autostarting?</div>
+      <div class="card-body" style="font-size:11px;color:var(--muted);line-height:1.8">
+        Add to <code style="color:var(--accent)">~/.config/hypr/hyprland.conf</code>:
+        <div style="margin:8px 0;padding:8px;background:var(--bg3);border-radius:4px;color:var(--green);font-size:10px;line-height:1.7">
+          exec-once = systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP DBUS_SESSION_BUS_ADDRESS
+        </div>
+        Then reload: <code style="color:var(--accent)">systemctl --user daemon-reload && systemctl --user enable byteslut</code>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+/* ── Daemon health check ── */
+(async()=>{
+  const el=document.getElementById('healthPanel');
+  try{
+    const d=await(await fetch('/api/dashboard-status')).json();
+    const h=d.health||{};
+    const checks=[
+      [h.active_session!=null,'Active session tracked','No active session — is daemon running?'],
+      [h.app_tracking,'App tracking working','App tracking broken — no foreground time in last 10min'],
+      [h.hyprland_env,'Hyprland env vars set','Hyprland env missing — add import-environment to hyprland.conf'],
+      [h.hyprland_socket!=null,'Hyprland socket found','Hyprland socket not found — is Hyprland running?'],
+      [h.in_input_group,'User in input group','Not in input group — sudo usermod -aG input $USER + logout'],
+      [h.input_devices_readable>0,(h.input_devices_readable||0)+' input devices readable','No readable input devices'],
+      [h.dbus_available,'dbus-python available','dbus-python missing — sudo pacman -S python-dbus python-gobject'],
+    ];
+    el.innerHTML=checks.map(([ok,g,b])=>
+      `<div style="padding:4px 0;border-bottom:1px solid var(--border);color:${ok?'var(--green)':'var(--red)'}">${ok?'● '+g:'✗ '+b}</div>`
+    ).join('')+(h.wayland_display?`<div style="padding:4px 0;font-size:10px;color:var(--dim)">WAYLAND=${h.wayland_display}</div>`:'');
+  }catch(e){el.innerHTML='<span style="color:var(--red)">Cannot reach web server</span>';}
+})();
+
+/* ── Database wipe flow ──────────────────────────────────────
+ * Step 1: User clicks "Generate confirmation code"
+ *   → POST /api/generate-wipe-token → server stores token in session
+ *   → Token shown to user (e.g. "K7X2PQ")
+ *
+ * Step 2: User types the code into the input field
+ *   → POST /api/wipe-database with {token: "K7X2PQ"}
+ *   → Server checks session token === submitted token
+ *   → If match: DELETE FROM all tables, return counts
+ *   → Token invalidated so it can't be reused
+ * ─────────────────────────────────────────────────────────── */
+
+async function requestWipeToken() {
+  try {
+    const resp = await fetch('/api/generate-wipe-token', { method: 'POST' });
+    const data = await resp.json();
+    document.getElementById('wipeTokenDisplay').textContent = data.token;
+    document.getElementById('wipeStep1').style.display = 'none';
+    document.getElementById('wipeStep2').style.display = 'block';
+    document.getElementById('wipeTokenInput').focus();
+  } catch(e) {
+    alert('Could not generate token — is the web server running?');
+  }
+}
+
+async function confirmWipe() {
+  const token = document.getElementById('wipeTokenInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('wipeError');
+  errEl.style.display = 'none';
+
+  if (!token) {
+    errEl.textContent = 'Please enter the confirmation code.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const resp = await fetch('/api/wipe-database', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      /* Success — show count and hide the wipe UI */
+      document.getElementById('wipeStep2').style.display = 'none';
+      document.getElementById('wipeSuccess').style.display = 'block';
+      document.getElementById('wipeCount').textContent = data.total_rows.toLocaleString();
+      /* Reload page after 3 seconds to reflect new record counts */
+      setTimeout(() => location.reload(), 3000);
+    } else {
+      errEl.textContent = data.error || 'Wrong code. Try again.';
+      errEl.style.display = 'block';
+      document.getElementById('wipeTokenInput').value = '';
+      document.getElementById('wipeTokenInput').focus();
+    }
+  } catch(e) {
+    errEl.textContent = 'Request failed — try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function cancelWipe() {
+  document.getElementById('wipeStep2').style.display = 'none';
+  document.getElementById('wipeStep1').style.display = 'block';
+  document.getElementById('wipeTokenInput').value = '';
+  document.getElementById('wipeError').style.display = 'none';
+}
+</script>
+{% endblock %}

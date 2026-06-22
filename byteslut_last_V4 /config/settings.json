@@ -1,0 +1,24 @@
+{
+  "app_name": "ByteSlut",
+  "cli_command": "byteslut",
+  "dashboard_port": 6969,
+  "collection_interval_seconds": 30,
+  "idle_threshold_seconds": 300,
+  "version": "4.0",
+  "anthropic_api_key": "my-real-key",
+  "privacy": {
+    "track_keystrokes": true,
+    "track_browser_history": true,
+    "track_notifications": true,
+    "track_commands": true,
+    "track_typed_words": true
+  },
+  "daily_report": {
+    "enabled": true,
+    "time": "20:00",
+    "delay_if_cpu_above_percent": 50,
+    "delay_if_temp_above_celsius": 82,
+    "delay_check_interval_seconds": 120,
+    "max_delay_minutes": 10
+  }
+}

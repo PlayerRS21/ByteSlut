@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Personal <span style="color:var(--accent)">Records</span></h1>
+  <div class="page-desc">All-time bests — updated live as you break them</div>
+</div>
+
+{% macro rec_card(title, recs_key, value_fn, sub, icon, accent) %}
+{% set r = recs[recs_key] %}
+<div class="card {{ accent }} mb8">
+  <div class="stat">
+    <div class="stat-lbl">{{ icon }} {{ title }}</div>
+    {% if r and r.v %}
+    <div class="stat-val {{ 'c-accent' if accent=='card-red' else ('c-green' if accent=='card-green' else ('c-blue' if accent=='card-blue' else ('c-yellow' if accent=='card-yellow' else 'c-purple'))) }}"
+         style="font-size:20px">{{ value_fn }}</div>
+    <div class="stat-sub">{{ r.date or '—' }}</div>
+    {% else %}
+    <div class="stat-val c-muted" style="font-size:16px">—</div>
+    <div class="stat-sub">no data yet</div>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+<!-- Header stats -->
+<div class="g4 mb">
+  <div class="card card-red"><div class="stat">
+    <div class="stat-lbl">Tracking Since</div>
+    <div class="stat-val c-accent" style="font-size:18px">{{ recs.tracking_since.v if recs.tracking_since and recs.tracking_since.v else '—' }}</div>
+    <div class="stat-sub">first day recorded</div>
+  </div></div>
+  <div class="card card-blue"><div class="stat">
+    <div class="stat-lbl">Total Days Tracked</div>
+    <div class="stat-val c-blue">{{ recs.total_days_tracked.v if recs.total_days_tracked else '—' }}</div>
+    <div class="stat-sub">unique days</div>
+  </div></div>
+  <div class="card card-green"><div class="stat">
+    <div class="stat-lbl">Most Used App Ever</div>
+    {% if recs.most_used_app_alltime and recs.most_used_app_alltime.v %}
+    <div class="stat-val c-green" style="font-size:15px">{{ recs.most_used_app_alltime.date }}</div>
+    <div class="stat-sub">{{ format_duration(recs.most_used_app_alltime.v) }} total</div>
+    {% else %}
+    <div class="stat-val c-green">—</div>
+    {% endif %}
+  </div></div>
+  <div class="card card-yellow"><div class="stat">
+    <div class="stat-lbl">Best Productivity</div>
+    {% if recs.best_productivity_score and recs.best_productivity_score.v %}
+    <div class="stat-val c-yellow">{{ '%.0f'%recs.best_productivity_score.v }}/100</div>
+    <div class="stat-sub">{{ recs.best_productivity_score.date }}</div>
+    {% else %}
+    <div class="stat-val c-yellow">—</div>
+    {% endif %}
+  </div></div>
+</div>
+
+<!-- Two column grid of records -->
+<div class="g2">
+
+  <!-- LEFT: input records -->
+  <div>
+    <div class="card-header" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px 6px 0 0;border-bottom:none">
+      ⌨ Input Records
+    </div>
+    <div class="card" style="border-radius:0 0 6px 6px;margin-bottom:12px">
+
+      {% if recs.most_keystrokes_day and recs.most_keystrokes_day.v %}
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-accent">Most Keystrokes in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_keystrokes_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--accent)">{{ '{:,}'.format(recs.most_keystrokes_day.v|int) }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if recs.fastest_wpm and recs.fastest_wpm.v %}
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-green">Fastest WPM Ever</div>
+            <div class="text-xs text-muted mt4">{{ recs.fastest_wpm.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--green)">{{ '%.0f'%recs.fastest_wpm.v }} wpm</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if recs.most_clicks_day and recs.most_clicks_day.v %}
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-blue">Most Mouse Clicks in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_clicks_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--blue)">{{ '{:,}'.format(recs.most_clicks_day.v|int) }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if recs.most_mouse_distance_day and recs.most_mouse_distance_day.v %}
+      <div style="padding:12px 14px">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-purple">Most Mouse Distance in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_mouse_distance_day.date }}</div>
+          </div>
+          {% set dist_mm = recs.most_mouse_distance_day.v * 25.4 / 96 %}
+          <div style="font-size:20px;font-weight:700;color:var(--purple)">
+            {% if dist_mm < 1000 %}{{ '%.0f'%dist_mm }} mm
+            {% elif dist_mm < 100000 %}{{ '%.1f'%(dist_mm/10) }} cm
+            {% elif dist_mm < 1000000 %}{{ '%.1f'%(dist_mm/1000) }} m
+            {% else %}{{ '%.2f'%(dist_mm/1000000) }} km{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not (recs.most_keystrokes_day and recs.most_keystrokes_day.v) %}
+      <div class="empty"><div class="empty-txt">No input data yet</div></div>
+      {% endif %}
+
+    </div>
+
+    <!-- Commands record -->
+    <div class="card-header" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px 6px 0 0;border-bottom:none">
+      $_ Command Records
+    </div>
+    <div class="card" style="border-radius:0 0 6px 6px">
+      {% if recs.most_commands_day and recs.most_commands_day.v %}
+      <div style="padding:12px 14px">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-blue">Most Commands in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_commands_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--blue)">{{ recs.most_commands_day.v }}</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty"><div class="empty-txt">No command data yet</div></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: session + browser + hardware records -->
+  <div>
+    <div class="card-header" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px 6px 0 0;border-bottom:none">
+      ◈ Session Records
+    </div>
+    <div class="card" style="border-radius:0 0 6px 6px;margin-bottom:12px">
+
+      {% if recs.longest_session and recs.longest_session.v %}
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-accent">Longest Single Session</div>
+            <div class="text-xs text-muted mt4">{{ recs.longest_session.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--accent)">{{ format_duration(recs.longest_session.v|int) }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if recs.most_screen_time_day and recs.most_screen_time_day.v %}
+      <div style="padding:12px 14px">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-green">Most Screen Time in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_screen_time_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--green)">{{ format_duration(recs.most_screen_time_day.v|int) }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not (recs.longest_session and recs.longest_session.v) %}
+      <div class="empty"><div class="empty-txt">No session data yet</div></div>
+      {% endif %}
+    </div>
+
+    <!-- Browser + network -->
+    <div class="card-header" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px 6px 0 0;border-bottom:none">
+      ◉ Browser &amp; Network Records
+    </div>
+    <div class="card" style="border-radius:0 0 6px 6px;margin-bottom:12px">
+
+      {% if recs.most_youtube_day and recs.most_youtube_day.v %}
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-red" style="color:var(--red)">Most YouTube Videos in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_youtube_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--red)">{{ recs.most_youtube_day.v }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if recs.most_downloaded_day and recs.most_downloaded_day.v %}
+      <div style="padding:12px 14px">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm c-blue">Most Downloaded in a Day</div>
+            <div class="text-xs text-muted mt4">{{ recs.most_downloaded_day.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--blue)">{{ format_bytes(recs.most_downloaded_day.v|int) }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not (recs.most_youtube_day and recs.most_youtube_day.v) %}
+      <div class="empty"><div class="empty-txt">No browser data yet</div></div>
+      {% endif %}
+    </div>
+
+    <!-- Hardware record -->
+    <div class="card-header" style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px 6px 0 0;border-bottom:none">
+      △ Hardware Records
+    </div>
+    <div class="card" style="border-radius:0 0 6px 6px">
+      {% if recs.hottest_temp and recs.hottest_temp.v %}
+      <div style="padding:12px 14px">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-sm temp-hot">Hottest CPU Temperature</div>
+            <div class="text-xs text-muted mt4">{{ recs.hottest_temp.date }}</div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:var(--red)">{{ '%.1f'%recs.hottest_temp.v }}°C</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty"><div class="empty-txt">No temperature data yet</div></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

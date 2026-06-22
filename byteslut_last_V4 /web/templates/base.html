@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ config.app_name }}</title>
+<style>
+/*
+ * ============================================================
+ * BYTESLUT v4 — DESIGN SYSTEM
+ * ============================================================
+ * All colors, spacing, and typography in one place.
+ * Change --accent to retheme the whole dashboard instantly.
+ * ============================================================
+ */
+:root {
+  /* === BACKGROUNDS (darkest → lightest) === */
+  --bg:      #0d0d0d;   /* page background */
+  --bg2:     #141414;   /* sidebar + card backgrounds */
+  --bg3:     #1c1c1c;   /* input fields, hover states */
+  --bg4:     #242424;   /* subtle dividers */
+
+  /* === ACCENT COLOR — change this to retheme === */
+  --accent:  #ff4444;
+
+  /* === STATUS COLORS === */
+  --green:   #4ade80;
+  --yellow:  #fbbf24;
+  --blue:    #60a5fa;
+  --purple:  #a78bfa;
+  --red:     #f87171;
+
+  /* === TEXT === */
+  --text:    #e2e8f0;
+  --muted:   #64748b;
+  --dim:     #334155;
+
+  /* === BORDERS === */
+  --border:  #1e1e1e;
+  --border2: #2a2a2a;
+
+  /* === LAYOUT === */
+  --sidebar: 195px;
+  --font: 'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ====================================================
+ * SIDEBAR
+ * Fixed left panel with navigation links.
+ * ==================================================== */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar);
+  background: var(--bg2);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* App name at top */
+.sidebar-brand {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border2);
+}
+.sidebar-brand .name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+.sidebar-brand .sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* Live clock row */
+.sidebar-clock {
+  padding: 6px 16px;
+  font-size: 10px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-dot {
+  width: 5px; height: 5px;
+  background: var(--green);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* Section label above groups of links */
+.nav-section {
+  padding: 10px 16px 3px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--dim);
+  font-weight: 600;
+}
+
+/* Single nav link */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 12px;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  color: var(--text);
+  background: var(--bg3);
+  border-left-color: var(--border2);
+}
+.nav-link.active {
+  color: var(--text);
+  background: var(--bg3);
+  border-left-color: var(--accent);
+}
+.nav-icon {
+  font-size: 12px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Version number at bottom */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--dim);
+}
+
+/* ====================================================
+ * MAIN CONTENT
+ * ==================================================== */
+.main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  padding: 20px 22px 48px;
+  min-width: 0; /* prevent overflow */
+}
+
+/* ====================================================
+ * PAGE HEADER
+ * ==================================================== */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border2);
+}
+.page-header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+.page-header .page-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ====================================================
+ * CARDS
+ * ==================================================== */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+/* Colored left-border accent variants */
+.card-red    { border-left: 3px solid var(--accent); }
+.card-green  { border-left: 3px solid var(--green); }
+.card-blue   { border-left: 3px solid var(--blue); }
+.card-yellow { border-left: 3px solid var(--yellow); }
+.card-purple { border-left: 3px solid var(--purple); }
+
+.card-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-body { padding: 14px; }
+
+/* ====================================================
+ * STAT WIDGETS  (small number cards)
+ * ==================================================== */
+.stat { padding: 13px 14px; }
+.stat-lbl {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+/* Color helpers for .stat-val */
+.c-accent { color: var(--accent) !important; }
+.c-green  { color: var(--green)  !important; }
+.c-blue   { color: var(--blue)   !important; }
+.c-yellow { color: var(--yellow) !important; }
+.c-purple { color: var(--purple) !important; }
+.c-red    { color: var(--red)    !important; }
+.c-muted  { color: var(--muted)  !important; }
+
+/* ====================================================
+ * PROGRESS BAR
+ * ==================================================== */
+.bar {
+  height: 3px;
+  background: var(--bg4);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width .5s ease;
+}
+.bar-fill.green  { background: var(--green); }
+.bar-fill.blue   { background: var(--blue); }
+.bar-fill.yellow { background: var(--yellow); }
+.bar-fill.purple { background: var(--purple); }
+
+/* ====================================================
+ * GRID HELPERS
+ * ==================================================== */
+.g2 { display: grid; grid-template-columns: 1fr 1fr;           gap: 12px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr;       gap: 12px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr);     gap: 12px; }
+.g12{ display: grid; grid-template-columns: 1fr 2fr;           gap: 12px; }
+.g21{ display: grid; grid-template-columns: 2fr 1fr;           gap: 12px; }
+.mb { margin-bottom: 12px; }
+
+@media(max-width:1100px) { .g4{grid-template-columns:1fr 1fr} }
+@media(max-width:800px)  { .g2,.g3,.g4,.g12,.g21{grid-template-columns:1fr} }
+
+/* ====================================================
+ * PERIOD TABS
+ * ==================================================== */
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab {
+  padding: 4px 11px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: none;
+  transition: all .12s;
+}
+.tab:hover  { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ====================================================
+ * DATA TABLE
+ * ==================================================== */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th {
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border2);
+  font-weight: 600;
+  background: var(--bg2);
+}
+.tbl td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg3); }
+.tbl-scroll { overflow-x:auto; overflow-y:auto; max-height:480px; }
+.tbl thead th { position: sticky; top: 0; z-index: 1; }
+
+/* ====================================================
+ * BADGES
+ * ==================================================== */
+.badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.b-green  { background:rgba(74,222,128,.12);  color:var(--green);  }
+.b-red    { background:rgba(248,113,113,.12); color:var(--red);    }
+.b-blue   { background:rgba(96,165,250,.12);  color:var(--blue);   }
+.b-yellow { background:rgba(251,191,36,.12);  color:var(--yellow); }
+.b-purple { background:rgba(167,139,250,.12); color:var(--purple); }
+.b-accent { background:rgba(255,68,68,.12);   color:var(--accent); }
+
+/* ====================================================
+ * FORMS
+ * ==================================================== */
+.field { margin-bottom: 13px; }
+.field-lbl {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.field-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-hint { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  transition: opacity .15s;
+}
+.btn:hover { opacity: .85; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Toggle switch */
+.toggle-wrap { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); cursor:pointer; }
+.toggle { position:relative; width:30px; height:16px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-track {
+  position:absolute; inset:0;
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  transition:all .2s;
+}
+.toggle input:checked ~ .toggle-track { background:rgba(255,68,68,.2); border-color:var(--accent); }
+.toggle-thumb {
+  position:absolute; top:2px; left:2px;
+  width:10px; height:10px; border-radius:50%;
+  background:var(--dim);
+  transition:all .2s;
+}
+.toggle input:checked ~ .toggle-track .toggle-thumb { transform:translateX(14px); background:var(--accent); }
+
+/* ====================================================
+ * CHART CONTAINER
+ * ==================================================== */
+.chart { position:relative; }
+.chart.h140 { height:140px; }
+.chart.h180 { height:180px; }
+.chart.h220 { height:220px; }
+.chart.h280 { height:280px; }
+
+/* ====================================================
+ * EMPTY STATE
+ * ==================================================== */
+.empty {
+  text-align:center;
+  padding:36px 16px;
+  color:var(--muted);
+}
+.empty-icon { font-size:26px; margin-bottom:8px; opacity:.35; }
+.empty-txt  { font-size:12px; }
+.empty-hint { font-size:10px; color:var(--dim); margin-top:5px; }
+
+/* ====================================================
+ * MISC UTILITIES
+ * ==================================================== */
+.alert-ok {
+  background:rgba(74,222,128,.08);
+  border:1px solid rgba(74,222,128,.25);
+  color:var(--green);
+  border-radius:5px;
+  padding:9px 13px;
+  font-size:11px;
+  margin-bottom:13px;
+}
+.text-accent { color:var(--accent); }
+.text-green  { color:var(--green);  }
+.text-blue   { color:var(--blue);   }
+.text-yellow { color:var(--yellow); }
+.text-muted  { color:var(--muted);  }
+.text-dim    { color:var(--dim);    }
+.text-sm     { font-size:11px; }
+.text-xs     { font-size:10px; }
+.mt4  { margin-top:4px; }
+.mt8  { margin-top:8px; }
+.mt12 { margin-top:12px; }
+.mb8  { margin-bottom:8px; }
+.mb12 { margin-bottom:12px; }
+.flex { display:flex; }
+.items-center  { align-items:center; }
+.justify-between { justify-content:space-between; }
+.gap4 { gap:4px; }
+.gap8 { gap:8px; }
+.gap12{ gap:12px; }
+.exit-ok  { color:var(--green); }
+.exit-err { color:var(--red);   }
+.exit-nil { color:var(--dim);   }
+.temp-ok   { color:var(--green);  }
+.temp-warm { color:var(--yellow); }
+.temp-hot  { color:var(--red);    }
+.sudo-tag {
+  background:rgba(251,191,36,.1);
+  color:var(--yellow);
+  font-size:9px;
+  padding:1px 5px;
+  border-radius:2px;
+  margin-left:4px;
+}
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- ====================================================
+     SIDEBAR
+     To add a new page link: copy one nav-link block,
+     change href and the endpoint name in the active check.
+     ==================================================== -->
+<aside class="sidebar">
+
+  <div class="sidebar-brand">
+    <div class="name">{{ config.app_name }}</div>
+    <div class="sub">System Monitor</div>
+  </div>
+
+  <div class="sidebar-clock">
+    <div class="live-dot"></div>
+    <span id="sb-clock">—</span>
+  </div>
+
+  <div class="nav-section">Overview</div>
+  <a href="/"         class="nav-link{{ ' active' if request.endpoint == 'index' else '' }}">
+    <span class="nav-icon">◈</span>Dashboard
+  </a>
+  <a href="/timeline" class="nav-link{{ ' active' if request.endpoint == 'timeline_page' else '' }}">
+    <span class="nav-icon">◫</span>Timeline
+  </a>
+
+  <div class="nav-section">Activity</div>
+  <a href="/apps"     class="nav-link{{ ' active' if request.endpoint == 'apps' else '' }}">
+    <span class="nav-icon">⬡</span>Apps
+  </a>
+  <a href="/browser"  class="nav-link{{ ' active' if request.endpoint == 'browser' else '' }}">
+    <span class="nav-icon">◉</span>Browser
+  </a>
+  <a href="/commands" class="nav-link{{ ' active' if request.endpoint == 'commands' else '' }}">
+    <span class="nav-icon">$_</span>Commands
+  </a>
+  <a href="/focus"    class="nav-link{{ ' active' if request.endpoint == 'focus' else '' }}">
+    <span class="nav-icon">◈</span>Focus Score
+  </a>
+  <a href="/roles"    class="nav-link{{ ' active' if request.endpoint == 'roles' else '' }}">
+    <span class="nav-icon">◉</span>Day Roles
+  </a>
+  <a href="/coach"    class="nav-link{{ ' active' if request.endpoint == 'coach' else '' }}">
+    <span class="nav-icon">✦</span>Coach
+  </a>
+  <a href="/records"  class="nav-link{{ ' active' if request.endpoint == 'records' else '' }}">
+    <span class="nav-icon">★</span>Records
+  </a>
+
+  <div class="nav-section">Hardware</div>
+  <a href="/hardware"    class="nav-link{{ ' active' if request.endpoint == 'hardware' else '' }}">
+    <span class="nav-icon">△</span>Hardware
+  </a>
+  <a href="/input-stats" class="nav-link{{ ' active' if request.endpoint == 'input_stats' else '' }}">
+    <span class="nav-icon">⌨</span>Input Stats
+  </a>
+
+  <div class="nav-section">Records</div>
+  <a href="/notifications" class="nav-link{{ ' active' if request.endpoint == 'notifications' else '' }}">
+    <span class="nav-icon">◯</span>Notifications
+  </a>
+  <a href="/packages"     class="nav-link{{ ' active' if request.endpoint == 'packages' else '' }}">
+    <span class="nav-icon">⬡</span>Packages
+  </a>
+  <a href="/monthly"      class="nav-link{{ ' active' if request.endpoint == 'monthly' else '' }}">
+    <span class="nav-icon">▦</span>Monthly
+  </a>
+  <a href="/yearly"       class="nav-link{{ ' active' if request.endpoint == 'yearly' else '' }}">
+    <span class="nav-icon">▤</span>Yearly
+  </a>
+
+  <div class="nav-section">Config</div>
+  <a href="/settings" class="nav-link{{ ' active' if request.endpoint == 'settings' else '' }}">
+    <span class="nav-icon">⚙</span>Settings
+  </a>
+
+  <div class="sidebar-footer">
+    v{{ config.get('version','4.0') }}<br>
+    <span id="sb-date">—</span>
+  </div>
+</aside>
+
+<!-- ====================================================
+     MAIN CONTENT — filled by each page template
+     ==================================================== -->
+<main class="main">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+/* ====================================================
+ * GLOBAL CHART DEFAULTS
+ * Applied to every chart automatically.
+ * ==================================================== */
+Chart.defaults.color       = '#64748b';
+Chart.defaults.borderColor = '#1e1e1e';
+Chart.defaults.font.family = "'JetBrains Mono',monospace";
+Chart.defaults.font.size   = 10;
+
+/* Color constants */
+const CA = '#ff4444';   /* accent  */
+const CG = '#4ade80';   /* green   */
+const CB = '#60a5fa';   /* blue    */
+const CY = '#fbbf24';   /* yellow  */
+const CP = '#a78bfa';   /* purple  */
+const CR = '#f87171';   /* red     */
+
+/* ====================================================
+ * FORMAT HELPERS
+ * fmtDur(seconds) → "2h 30m" / "45m" / "30s"
+ * fmtBytes(bytes) → "1.2 MB" / "450 KB"
+ * ==================================================== */
+function fmtDur(s) {
+  s = Math.round(s || 0);
+  if (s < 60)   return s + 's';
+  if (s < 3600) return Math.floor(s/60) + 'm ' + (s%60 ? s%60+'s' : '');
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  return h + 'h' + (m ? ' '+m+'m' : '');
+}
+function fmtBytes(b) {
+  b = b || 0;
+  if (b < 1024)       return b + ' B';
+  if (b < 1048576)    return (b/1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+  return (b/1073741824).toFixed(2) + ' GB';
+}
+
+/* ====================================================
+ * CHART FACTORY FUNCTIONS
+ * Use these in page templates to create charts.
+ *
+ * barChart(id, labels, values_in_seconds, color)
+ * lineChart(id, labels, [{label,data,color,fill}])
+ * rawLine(id, labels, [{label,data,color}], yFmt)
+ * donut(id, labels, data, colors)
+ * ==================================================== */
+function barChart(id, labels, data, color) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  return new Chart(c, {
+    type: 'bar',
+    data: { labels, datasets: [{
+      data,
+      backgroundColor: (color||CA)+'44',
+      borderColor: color||CA,
+      borderWidth: 1, borderRadius: 3
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:x=>fmtDur(x.raw)}} },
+      scales: {
+        x: { grid:{display:false} },
+        y: { beginAtZero:true, ticks:{callback:v=>fmtDur(v)} }
+      }
+    }
+  });
+}
+
+function lineChart(id, labels, datasets) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  return new Chart(c, {
+    type: 'line',
+    data: { labels, datasets: datasets.map(d => ({
+      label: d.label, data: d.data,
+      borderColor: d.color, backgroundColor: d.color+'22',
+      borderWidth: 2, fill: d.fill!==false,
+      tension: 0.3, pointRadius: d.points!==false ? 2 : 0
+    }))},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ position:'top' } },
+      scales: {
+        x: { grid:{color:'#1e1e1e'} },
+        y: { beginAtZero:true, grid:{color:'#1e1e1e'}, ticks:{callback:v=>fmtDur(v)} }
+      }
+    }
+  });
+}
+
+function rawLine(id, labels, datasets, yFmt) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  return new Chart(c, {
+    type: 'line',
+    data: { labels, datasets: datasets.map(d => ({
+      label: d.label, data: d.data,
+      borderColor: d.color, backgroundColor: d.color+'18',
+      borderWidth: 2, fill: d.fill!==false,
+      tension: 0.3, pointRadius: 0
+    }))},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ position:'top' } },
+      scales: {
+        x: { grid:{color:'#1e1e1e'} },
+        y: { grid:{color:'#1e1e1e'}, ticks:{ callback: yFmt || (v=>v) } }
+      }
+    }
+  });
+}
+
+function donut(id, labels, data, colors) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  return new Chart(c, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { position:'right', labels:{ boxWidth:9, padding:10 } },
+        tooltip: { callbacks:{ label:x=>x.label+': '+fmtDur(x.raw) } }
+      }
+    }
+  });
+}
+
+/* ====================================================
+ * LIVE STATS — polls /api/live-stats every 30s
+ * Updates elements with data-live="cpu|ram|temp"
+ * ==================================================== */
+async function pollLive() {
+  try {
+    const d = await (await fetch('/api/live-stats')).json();
+    document.querySelectorAll('[data-live]').forEach(el => {
+      const k = el.dataset.live;
+      if (k==='cpu'  && d.cpu_percent  != null) el.textContent = d.cpu_percent.toFixed(1)+'%';
+      if (k==='ram'  && d.ram_percent  != null) el.textContent = d.ram_percent.toFixed(1)+'%';
+      if (k==='temp' && d.cpu_temp     != null) el.textContent = d.cpu_temp.toFixed(1)+'°C';
+    });
+  } catch(e) {}
+}
+setInterval(pollLive, 30000);
+pollLive();
+
+/* ====================================================
+ * SIDEBAR CLOCK
+ * ==================================================== */
+function tickClock() {
+  const n = new Date();
+  const t = n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d = n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const tc = document.getElementById('sb-clock');
+  const dc = document.getElementById('sb-date');
+  if (tc) tc.textContent = t;
+  if (dc) dc.textContent = d;
+}
+tickClock();
+setInterval(tickClock, 1000);
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
