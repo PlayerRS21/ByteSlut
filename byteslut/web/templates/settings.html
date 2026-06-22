@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Settings</h1>
+    <div class="page-desc">App configuration, privacy controls, data management</div>
+  </div>
+</div>
+
+{% if message %}
+<div class="alert-ok mb" style="padding:10px 14px;font-size:12px">
+  ✓ {{ message }}
+</div>
+{% endif %}
+
+<form method="POST" action="/settings">
+
+  <!-- ── App Identity ─────────────────────────────────────────── -->
+  <div class="card mb">
+    <div class="card-header">App Identity</div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <div>
+          <div class="field-lbl">App Name</div>
+          <input type="text" name="app_name"
+                 value="{{ config.get('app_name') or 'ByteSlut' }}"
+                 placeholder="ByteSlut"
+                 class="field-input" style="width:100%">
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            Shown in sidebar and page title
+          </div>
+        </div>
+
+        <div>
+          <div class="field-lbl">CLI Command</div>
+          <input type="text" name="cli_command"
+                 value="{{ config.get('cli_command') or 'byteslut' }}"
+                 placeholder="byteslut"
+                 class="field-input" style="width:100%;color:var(--accent)"
+                 oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_-]/g,'')">
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            Shell command to open dashboard. <strong style="color:var(--accent)">Restart terminal after saving.</strong>
+          </div>
+        </div>
+
+        <div>
+          <div class="field-lbl">Dashboard Port</div>
+          <input type="number" name="dashboard_port"
+                 value="{{ config.get('dashboard_port') or 6969 }}"
+                 min="1024" max="65535"
+                 class="field-input" style="width:100%">
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Default: 6969</div>
+        </div>
+
+        <div>
+          <div class="field-lbl">Collection Interval (seconds)</div>
+          <input type="number" name="collection_interval"
+                 value="{{ config.get('collection_interval_seconds') or 30 }}"
+                 min="10" max="300"
+                 class="field-input" style="width:100%">
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">
+            How often stats are collected. Lower = more detail, more CPU.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Layout Theme ────────────────────────────────────────── -->
+  <div class="card mb">
+    <div class="card-header" style="justify-content:space-between">
+      Layout Theme
+      <span style="font-size:9px;color:var(--muted)">
+        Drop a folder in <code style="color:var(--accent)">web/themes/</code> to add themes
+      </span>
+    </div>
+    <div class="card-body">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+        Layout themes change the <strong style="color:var(--text)">structure</strong> of the UI —
+        card styles, spacing, sidebar, typography. Each theme is a folder in
+        <code style="color:var(--accent)">web/themes/</code> with
+        <code>theme.json</code> + <code>style.css</code>.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+
+        <!-- Default (always shown) -->
+        {% set cur_layout = config.get('ui_layout','default') %}
+        <label style="cursor:pointer">
+          <input type="radio" name="ui_layout" value="default"
+                 {{ 'checked' if cur_layout=='default' else '' }}
+                 style="display:none" onchange="saveLayout('default')">
+          <div class="theme-card {{ 'theme-card-active' if cur_layout=='default' else '' }}"
+               id="layout-default">
+            <div class="theme-card-name">Default</div>
+            <div class="theme-card-desc">Standard layout, clean and functional</div>
+          </div>
+        </label>
+
+        {% if available_themes %}
+          {% for key, theme in available_themes.items() %}
+          <label style="cursor:pointer">
+            <input type="radio" name="ui_layout" value="{{ key }}"
+                   {{ 'checked' if cur_layout==key else '' }}
+                   style="display:none" onchange="saveLayout('{{ key }}')">
+            <div class="theme-card {{ 'theme-card-active' if cur_layout==key else '' }}
+                         {{ 'theme-card-broken' if not theme.valid else '' }}"
+                 id="layout-{{ key }}">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="theme-card-name">{{ theme.name }}</div>
+                {% if not theme.valid %}
+                <span style="font-size:8px;background:rgba(255,68,68,.2);color:var(--accent);
+                              padding:1px 5px;border-radius:3px;font-weight:700">MISSING CSS</span>
+                {% endif %}
+              </div>
+              <div class="theme-card-desc">{{ theme.description }}</div>
+              {% if theme.author %}
+              <div style="font-size:9px;color:var(--dim);margin-top:2px">by {{ theme.author }}</div>
+              {% endif %}
+              {% if not theme.valid %}
+              <div style="font-size:9px;color:var(--accent);margin-top:4px">
+                Missing: {{ theme.missing[:2]|join(', ') }}{% if theme.missing|length > 2 %} +{{ theme.missing|length-2 }}{% endif %}
+              </div>
+              {% endif %}
+            </div>
+          </label>
+          {% endfor %}
+        {% endif %}
+
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6">
+        To create a theme: copy <code style="color:var(--accent)">web/themes/_example/</code>
+        → <code style="color:var(--accent)">web/themes/yourname/</code>, edit the two files.
+        Reload the page to see it. Layout applies on next page load after saving.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Privacy Controls ─────────────────────────────────────── -->
+  <div class="card mb">
+    <div class="card-header" style="justify-content:space-between">
+      Privacy Controls
+      <span style="font-size:10px;color:var(--green)">● Changes apply within 10 seconds</span>
+    </div>
+    <div class="card-body">
+      <div style="font-size:10px;color:var(--blue);background:rgba(96,165,250,.07);
+                  border:1px solid rgba(96,165,250,.2);border-radius:4px;
+                  padding:9px 12px;margin-bottom:12px;line-height:1.7">
+        These toggles actually work — turning one off stops collection within 10 seconds
+        without restarting the daemon.
+      </div>
+      {% set priv = config.get('privacy',{}) %}
+      {% for key,lbl,hint in [
+        ('track_keystrokes',      'Track keystrokes & mouse',   'Counts only — no keys ever stored'),
+        ('track_browser_history', 'Track browser history',      'Reads local Chromium/Firefox SQLite'),
+        ('track_notifications',   'Track notifications',        'Requires python-dbus python-gobject'),
+        ('track_commands',        'Track terminal commands',    'Shell hook — what commands you run'),
+        ('track_typed_words',     'Track WPM typing speed',     'Keystroke timing only — no words stored'),
+      ] %}
+      <div style="display:flex;align-items:center;justify-content:space-between;
+                  padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12px;font-weight:600">{{ lbl }}</div>
+          <div style="font-size:10px;color:var(--muted)">{{ hint }}</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="{{ key }}" {{ 'checked' if priv.get(key,True) else '' }}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Daily Report ──────────────────────────────────────────── -->
+  <div class="card mb">
+    <div class="card-header">Daily Report</div>
+    <div class="card-body">
+      {% set rpt = config.get('daily_report',{}) %}
+      <div style="display:flex;align-items:center;justify-content:space-between;
+                  padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px">
+        <div>
+          <div style="font-size:12px;font-weight:600">Enable daily report</div>
+          <div style="font-size:10px;color:var(--muted)">Opens dashboard at specified time each day</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="report_enabled" {{ 'checked' if rpt.get('enabled',True) else '' }}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <div>
+          <div class="field-lbl">Open at</div>
+          <input type="time" name="report_time"
+                 value="{{ rpt.get('time','18:30') }}" class="field-input" style="width:100%">
+        </div>
+        <div>
+          <div class="field-lbl">Max delay (minutes)</div>
+          <input type="number" name="report_max_delay"
+                 value="{{ rpt.get('max_delay_minutes',60) }}" min="0" max="240"
+                 class="field-input" style="width:100%">
+        </div>
+        <div>
+          <div class="field-lbl">Delay if CPU above (%)</div>
+          <input type="number" name="report_cpu_threshold"
+                 value="{{ rpt.get('delay_if_cpu_above_percent',30) }}" min="10" max="100"
+                 class="field-input" style="width:100%">
+        </div>
+        <div>
+          <div class="field-lbl">Delay if temp above (°C)</div>
+          <input type="number" name="report_temp_threshold"
+                 value="{{ rpt.get('delay_if_temp_above_celsius',75) }}" min="40" max="100"
+                 class="field-input" style="width:100%">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AI Coach ──────────────────────────────────────────────── -->
+  <div class="card mb">
+    <div class="card-header">+ AI Coach <span style="color:var(--muted);font-size:9px;margin-left:6px">OPT-IN</span></div>
+    <div class="card-body">
+      {% set ai = config.get('ai_coach',{}) %}
+
+      <div style="background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);
+                  border-radius:4px;padding:10px 14px;margin-bottom:14px;font-size:10px;
+                  color:var(--yellow);line-height:1.8">
+        <strong>⚠ If enabled, this data is sent to your chosen AI:</strong><br>
+        • Average productivity score (e.g. "72/100")<br>
+        • Score trend direction and delta<br>
+        • Best / worst day of week + scores<br>
+        • Time split % (coding, learning, entertainment)<br>
+        • Distraction site names + hours<br>
+        • Recent day role names<br>
+        <strong style="color:var(--green)">NOT sent:</strong> URLs, commands, file names, app names, screenshots, typed text
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:11px">
+          <input type="checkbox" name="ai_understand" style="margin-top:2px"
+                 {{ 'checked' if ai.get('consent_given') else '' }}
+                 onchange="toggleAI()"> I understand the above and want to enable AI Coach
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:11px">
+          <input type="checkbox" name="ai_consent" style="margin-top:2px"
+                 {{ 'checked' if ai.get('consent_given') else '' }}
+                 onchange="toggleAI()"> I consent to the listed data being sent to the AI service I select below
+        </label>
+      </div>
+
+      <div id="aiFields" style="display:{{ 'block' if ai.get('consent_given') else 'none' }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <div class="field-lbl">AI Service</div>
+            <select name="ai_model" class="field-input" style="width:100%"
+                    onchange="toggleModelFields(this.value)">
+              {% for v,n in [('claude','Claude (Anthropic)'),('gpt','GPT-4o (OpenAI)'),
+                             ('gemini','Gemini (Google)'),('ollama','Local Ollama'),
+                             ('custom','Custom endpoint')] %}
+              <option value="{{ v }}" {{ 'selected' if ai.get('ai_model','claude')==v }}>{{ n }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <div class="field-lbl">API Key</div>
+            <input type="password" name="anthropic_api_key"
+                   value="{{ config.get('anthropic_api_key','') }}"
+                   placeholder="sk-ant-… / sk-… / AIza…"
+                   class="field-input" style="width:100%">
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">
+              <a href="https://console.anthropic.com" target="_blank" style="color:var(--muted)">claude</a> ·
+              <a href="https://platform.openai.com" target="_blank" style="color:var(--muted)">openai</a> ·
+              <a href="https://ai.google.dev" target="_blank" style="color:var(--muted)">google</a>
+            </div>
+          </div>
+        </div>
+        <div id="customUrlField" style="display:{{ 'block' if ai.get('ai_model')=='custom' else 'none' }}">
+          <div class="field-lbl">Custom endpoint URL</div>
+          <input type="text" name="ai_custom_url"
+                 value="{{ ai.get('custom_api_url','') }}"
+                 placeholder="http://localhost:11434/api/chat"
+                 class="field-input" style="width:100%">
+        </div>
+        <input type="hidden" name="ai_coach_enabled" value="1">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Save button ───────────────────────────────────────────── -->
+  <div style="display:flex;gap:10px;margin-bottom:20px">
+    <button type="submit" class="btn btn-primary" style="padding:9px 24px;font-size:12px;font-weight:700">
+      Save Settings
+    </button>
+    <div style="font-size:10px;color:var(--muted);align-self:center">
+      Changes take effect immediately (daemon reloads privacy within 10s)
+    </div>
+  </div>
+
+</form>
+
+<!-- ── Database ──────────────────────────────────────────────── -->
+<div class="card mb">
+  <div class="card-header">Database</div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px 16px;margin-bottom:16px">
+      <div class="flex justify-between py4">
+        <span class="text-xs text-muted">Size</span>
+        <span class="text-xs">{{ db_size_mb }} MB</span>
+      </div>
+      <div class="flex justify-between py4">
+        <span class="text-xs text-muted">Location</span>
+        <span class="text-xs" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;
+              white-space:nowrap" title="{{ db_path }}">{{ db_path }}</span>
+      </div>
+      <div class="flex justify-between py4">
+        <span class="text-xs text-muted">Since</span>
+        <span class="text-xs">{{ oldest_date }}</span>
+      </div>
+      <div class="flex justify-between py4">
+        <span class="text-xs text-muted">Retention</span>
+        <span class="text-xs c-green">Auto-managed (raw → hourly → monthly)</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:16px">
+      {% for tbl, cnt in record_counts.items() %}
+      <div class="flex justify-between py4" style="border-bottom:1px solid var(--border)">
+        <span class="text-xs text-muted">{{ tbl.replace('_',' ') }}</span>
+        <span class="text-xs">{{ '{:,}'.format(cnt) }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center">
+      <button type="button" onclick="requestVacuum()"
+              class="btn btn-ghost" style="padding:6px 14px;font-size:10px">
+        🗜 Compact Database
+      </button>
+      <span style="font-size:10px;color:var(--muted)">Reclaims deleted rows, runs VACUUM</span>
+    </div>
+
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px">
+        ⚠ Danger Zone
+      </div>
+      <div id="wipeStep1">
+        <button type="button" onclick="requestWipeToken()"
+                class="btn" style="background:rgba(255,68,68,.1);border-color:var(--accent);
+                                   color:var(--accent);padding:6px 14px;font-size:10px">
+          Delete All Data
+        </button>
+        <span style="font-size:10px;color:var(--muted);margin-left:8px">
+          Wipes every recorded event. App stays installed.
+        </span>
+      </div>
+      <div id="wipeStep2" style="display:none">
+        <div style="font-size:11px;color:var(--accent);margin-bottom:6px">
+          Type <strong id="wipeTokenDisplay" style="color:#fff;letter-spacing:.15em"></strong> to confirm:
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="wipeTokenInput" placeholder="Type code…"
+                 class="field-input" style="width:160px;text-transform:uppercase"
+                 oninput="this.value=this.value.toUpperCase()" maxlength="6">
+          <button onclick="confirmWipe()"
+                  class="btn" style="background:rgba(255,68,68,.2);border-color:var(--accent);
+                                     color:var(--accent);padding:6px 14px;font-size:10px">
+            Confirm Delete
+          </button>
+          <button onclick="cancelWipe()" class="btn btn-ghost"
+                  style="padding:6px 14px;font-size:10px">Cancel</button>
+        </div>
+        <div id="wipeError" style="display:none;font-size:10px;color:var(--accent);margin-top:6px"></div>
+      </div>
+      <div id="wipeSuccess" style="display:none;font-size:11px;color:var(--green)">
+        ✓ All data deleted (<span id="wipeCount">0</span> rows removed).
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+/* Theme cards */
+.theme-card {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  transition: all .15s;
+}
+.theme-card:hover { border-color: var(--accent); background: rgba(255,68,68,.04); }
+.theme-card-active { border-color: var(--accent) !important; background: rgba(255,68,68,.08) !important; }
+.theme-card-broken { border-color: rgba(255,68,68,.3) !important; }
+.theme-card-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.theme-card-active .theme-card-name { color: var(--accent); }
+.theme-card-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Toggles */
+.toggle { position:relative; display:inline-block; width:42px; height:22px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; inset:0;
+  background: var(--border2);
+  border-radius: 22px;
+  cursor: pointer;
+  transition: .2s;
+}
+.toggle-slider::before {
+  content:'';
+  position:absolute;
+  width:16px; height:16px;
+  left:3px; top:3px;
+  background:#fff;
+  border-radius:50%;
+  transition:.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* btn-primary override */
+.btn-primary {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+.btn-primary:hover { opacity: .9 !important; }
+</style>
+
+<script>
+function toggleAI() {
+  const both = document.querySelector('[name="ai_understand"]').checked &&
+               document.querySelector('[name="ai_consent"]').checked;
+  document.getElementById('aiFields').style.display = both ? 'block' : 'none';
+}
+function toggleModelFields(v) {
+  document.getElementById('customUrlField').style.display =
+    v === 'custom' ? 'block' : 'none';
+}
+
+async function saveLayout(key) {
+  /* Highlight selected card immediately */
+  document.querySelectorAll('.theme-card').forEach(el => {
+    el.classList.remove('theme-card-active');
+    el.querySelector('.theme-card-name').style.color = '';
+  });
+  const el = document.getElementById('layout-' + key);
+  if (el) {
+    el.classList.add('theme-card-active');
+    el.querySelector('.theme-card-name').style.color = 'var(--accent)';
+  }
+  try {
+    await fetch('/api/save-theme', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({layout: key})
+    });
+    /* Reload page so new layout CSS loads */
+    setTimeout(() => location.reload(), 300);
+  } catch(e) {}
+}
+
+async function requestVacuum() {
+  const btn = event.target;
+  btn.textContent = 'Compacting…'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/vacuum-db', {method:'POST'});
+    const d = await r.json();
+    btn.textContent = d.ok
+      ? `✓ Compacted (${d.size_before_mb}MB → ${d.size_after_mb}MB)`
+      : '✗ Failed';
+  } catch(e) { btn.textContent = '✗ Error'; }
+  btn.disabled = false;
+}
+
+async function requestWipeToken() {
+  const r = await fetch('/api/generate-wipe-token', {method:'POST'});
+  const d = await r.json();
+  document.getElementById('wipeTokenDisplay').textContent = d.token;
+  document.getElementById('wipeStep1').style.display = 'none';
+  document.getElementById('wipeStep2').style.display = 'block';
+  document.getElementById('wipeTokenInput').focus();
+}
+async function confirmWipe() {
+  const token = document.getElementById('wipeTokenInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('wipeError');
+  errEl.style.display = 'none';
+  if (!token) { errEl.textContent='Enter the code.'; errEl.style.display='block'; return; }
+  const r = await fetch('/api/wipe-database', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token})
+  });
+  const d = await r.json();
+  if (d.ok) {
+    document.getElementById('wipeStep2').style.display='none';
+    document.getElementById('wipeSuccess').style.display='block';
+    document.getElementById('wipeCount').textContent=(d.total_rows||0).toLocaleString();
+    setTimeout(()=>location.reload(), 3000);
+  } else {
+    errEl.textContent=d.error||'Wrong code.';
+    errEl.style.display='block';
+    document.getElementById('wipeTokenInput').value='';
+  }
+}
+function cancelWipe() {
+  document.getElementById('wipeStep1').style.display='block';
+  document.getElementById('wipeStep2').style.display='none';
+  document.getElementById('wipeError').style.display='none';
+}
+</script>
+{% endblock %}

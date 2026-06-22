@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Terminal Commands</h1><div class="page-desc">Newest first · errors highlighted · load more at bottom</div></div>
+</div>
+<div class="flex gap8 mb" style="flex-wrap:wrap;align-items:flex-end">
+  <div class="tabs" style="margin-bottom:0">
+    {% for p,l in [('today','Today'),('yesterday','Yesterday'),('week','Week'),('month','Month'),('year','Year')] %}
+    <a href="/commands?period={{ p }}&filter={{ filter_type }}" class="tab{{ ' active' if period==p else '' }}">{{ l }}</a>
+    {% endfor %}
+  </div>
+  <div class="tabs" style="margin-bottom:0">
+    {% for f,l in [('all','All'),('errors','Errors'),('sudo','Sudo')] %}
+    <a href="/commands?period={{ period }}&filter={{ f }}" class="tab{{ ' active' if filter_type==f else '' }}">{{ l }}</a>
+    {% endfor %}
+  </div>
+  <span class="text-xs text-muted">{{ total }} total</span>
+</div>
+<div class="g2 mb">
+  <div class="card">
+    <div class="card-header">Most Frequent</div>
+    <div class="card-body">
+      {% if top_commands %}
+      {% set mc = top_commands[0].count %}
+      {% for cmd in top_commands %}
+      <div class="mb8">
+        <div class="flex justify-between mb4">
+          <span class="text-sm c-blue" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1" title="{{ cmd.command }}">{{ cmd.command[:42] }}</span>
+          <span class="text-xs text-muted flex-shrink-0" style="flex-shrink:0;margin-left:8px"><span class="c-green">{{ cmd.success_count }}✓</span>{% if cmd.error_count %}<span class="c-red"> {{ cmd.error_count }}✗</span>{% endif %} · {{ cmd.count }}×</span>
+        </div>
+        <div class="bar"><div class="bar-fill blue" style="width:{{ [((cmd.count/(mc or 1))*100),100]|min|int }}%"></div></div>
+      </div>
+      {% endfor %}
+      {% else %}<div class="empty"><div class="empty-txt">No commands yet</div></div>{% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Stats</div>
+    <div class="card-body">
+      {% set shown = cmd_data|length %}
+      {% set errors = cmd_data|selectattr('exit_code')|selectattr('exit_code','ne',0)|list|length %}
+      {% set sudos  = cmd_data|selectattr('is_sudo')|list|length %}
+      {% for l,v,c in [('Shown',shown,'var(--accent)'),('Total',total,'var(--text)'),('Errors',errors,'var(--red)'),('Sudo',sudos,'var(--yellow)'),('Success rate','%.1f%%'%((shown-errors)/(shown or 1)*100),'var(--green)')] %}
+      <div class="flex justify-between" style="padding:6px 0;border-bottom:1px solid var(--border)">
+        <span class="text-muted">{{ l }}</span><span style="color:{{ c }};font-weight:700">{{ v }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Command</th><th>Exit</th><th>Duration</th><th>Directory</th><th>Shell</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for cmd in cmd_data %}
+        <tr style="{{ 'background:rgba(248,113,113,.04)' if cmd.exit_code and cmd.exit_code!=0 else '' }}">
+          <td style="max-width:0">
+            <div class="flex items-center gap8">
+              <span class="text-dim text-xs">$</span>
+              <span class="c-blue text-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;display:block" title="{{ cmd.command }}">{{ cmd.command }}</span>
+              {% if cmd.is_sudo %}<span class="sudo-tag">sudo</span>{% endif %}
+            </div>
+          </td>
+          <td>
+            {% if cmd.exit_code is none %}<span class="exit-nil">—</span>
+            {% elif cmd.exit_code==0 %}<span class="exit-ok">✓ 0</span>
+            {% else %}<span class="exit-err">✗ {{ cmd.exit_code }}</span>{% endif %}
+          </td>
+          <td class="text-muted text-xs">{{ format_duration(cmd.duration_seconds) if cmd.duration_seconds else '—' }}</td>
+          <td class="text-muted text-xs" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ cmd.working_directory }}">
+            {{ (cmd.working_directory or '').replace('/home/'+g_user,'~') or '—' }}
+          </td>
+          <td><span class="badge b-purple">{{ cmd.shell or '?' }}</span></td>
+          <td class="text-dim text-xs">{{ cmd.timestamp|strftime('%m/%d %H:%M') if cmd.timestamp else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty"><div class="empty-txt">No commands found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if has_more %}
+  <div style="padding:12px;text-align:center;border-top:1px solid var(--border2)">
+    <a href="/commands?period={{ period }}&filter={{ filter_type }}&offset={{ offset+limit }}" class="btn" style="text-decoration:none">
+      Load more ({{ total-offset-limit }} remaining)
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

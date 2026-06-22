@@ -1,0 +1,8 @@
+{
+  "name": "Minimal",
+  "description": "Pure typography, no card backgrounds, hairline borders, maximum focus",
+  "author": "ByteSlut",
+  "version": "1.0",
+  "accent_default": "#ff4444",
+  "preview_colors": ["#0a0a0a", "#ff4444", "transparent"]
+}

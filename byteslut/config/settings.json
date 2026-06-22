@@ -1,0 +1,34 @@
+{
+  "app_name": "Tracker's Eye",
+  "cli_command": "eye",
+  "dashboard_port": 6969,
+  "collection_interval_seconds": 60,
+  "idle_threshold_seconds": 300,
+  "version": "5.1.0",
+  "ui_theme": "default",
+  "ui_layout": "default",
+  "accent_color": "",
+  "ui_background": "",
+  "anthropic_api_key": "AIzaSyCGVn736W3xXHdX1a3s20SUq4S6hPENgUk",
+  "ai_coach": {
+    "enabled": true,
+    "ai_model": "gemini",
+    "consent_given": true,
+    "custom_api_url": ""
+  },
+  "privacy": {
+    "track_keystrokes": true,
+    "track_browser_history": true,
+    "track_notifications": true,
+    "track_commands": true,
+    "track_typed_words": true
+  },
+  "daily_report": {
+    "enabled": true,
+    "time": "18:00",
+    "delay_if_cpu_above_percent": 30,
+    "delay_if_temp_above_celsius": 82,
+    "delay_check_interval_seconds": 120,
+    "max_delay_minutes": 10
+  }
+}

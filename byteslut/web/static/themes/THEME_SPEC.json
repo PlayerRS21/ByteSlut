@@ -1,0 +1,36 @@
+{
+  "_comment": "Required CSS selectors every theme MUST define. Theme validator checks these.",
+  "required_selectors": [
+    "body",
+    ".sidebar",
+    ".main-content",
+    ".card",
+    ".card-header",
+    ".card-body",
+    ".nav-link",
+    ".nav-link.active",
+    ".stat-val",
+    ".btn",
+    ".bar",
+    ".bar-fill"
+  ],
+  "optional_selectors": [
+    ".stat-lbl",
+    ".stat-sub",
+    ".badge",
+    ".tab",
+    ".tab.active",
+    ".tbl th",
+    ".tbl td",
+    ".field-input",
+    ".page-header h1",
+    ".btn:hover"
+  ],
+  "css_variables_required": [
+    "--bg",
+    "--accent",
+    "--text",
+    "--muted",
+    "--border"
+  ]
+}

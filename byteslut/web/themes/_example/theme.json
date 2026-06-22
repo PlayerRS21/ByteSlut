@@ -1,0 +1,8 @@
+{
+  "name": "Example Theme",
+  "description": "A fully documented starter template — copy this folder to make your own",
+  "author": "ByteSlut",
+  "version": "1.0",
+  "accent_default": "#00b4d8",
+  "preview_colors": ["#0d1117", "#00b4d8", "#1a2332"]
+}

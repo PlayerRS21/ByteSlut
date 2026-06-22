@@ -1,0 +1,147 @@
+/*
+ * MINIMAL THEME — Clean typography, no decorations, maximum readability
+ * Structural changes: no card backgrounds, no borders except dividers,
+ * sidebar is borderless, everything is just text and spacing.
+ */
+
+/* Cards: no background, just spacing and a bottom rule */
+.card {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 24px !important;
+}
+.card-body { padding: 12px 0 !important; }
+.card-header {
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 8px 0 !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  color: var(--muted) !important;
+  background: transparent !important;
+}
+
+/* Sidebar: no background, just a right border */
+.sidebar {
+  background: transparent !important;
+  border-right: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+.sidebar-brand {
+  border-bottom: 1px solid var(--border) !important;
+  background: transparent !important;
+}
+.sidebar-brand .name {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.12em !important;
+}
+
+/* Nav links: no backgrounds, just underlines */
+.nav-link {
+  border-radius: 0 !important;
+  border-left: none !important;
+  padding: 6px 20px !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+}
+.nav-link:hover { color: var(--text) !important; background: transparent !important; }
+.nav-link.active {
+  color: var(--text) !important;
+  background: transparent !important;
+  border-left: none !important;
+  border-right: 2px solid var(--accent) !important;
+}
+
+/* Main content: full width, no padding */
+.main-content { background: var(--bg) !important; }
+
+/* Stat values: large, clean */
+.stat-val {
+  font-size: 28px !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
+  filter: none !important;
+}
+
+/* Bars: hairline */
+.bar { height: 1px !important; background: var(--border) !important; border-radius: 0 !important; }
+.bar-fill { border-radius: 0 !important; }
+
+/* Buttons: minimal bordered */
+.btn {
+  background: transparent !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 2px !important;
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+.btn:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: transparent !important;
+}
+
+/* Tables: no alternating rows, hairline separators */
+.tbl tbody tr { background: transparent !important; }
+.tbl tbody tr:hover { background: rgba(255,255,255,0.02) !important; }
+.tbl th {
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+  font-size: 9px !important;
+  text-transform: uppercase !important;
+  color: var(--muted) !important;
+}
+
+/* Page headers: no decoration */
+.page-header h1 {
+  font-weight: 300 !important;
+  font-size: 22px !important;
+  letter-spacing: 0.03em !important;
+  border: none !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+
+/* Remove all color-coded card borders */
+.card-red, .card-green, .card-blue, .card-yellow, .card-purple {
+  border-left: none !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* Tabs: no borders, just underlines */
+.tab {
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  padding: 6px 12px !important;
+  background: transparent !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+}
+.tab.active {
+  border-bottom-color: var(--accent) !important;
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+/* Badges: text only */
+.badge {
+  background: transparent !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 2px !important;
+  font-size: 9px !important;
+}
+
+/* Required selectors to pass validation */
+.stat-lbl { font-size: 9px !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: var(--muted) !important; }
+.field-input { background: transparent !important; border: 1px solid var(--border) !important; border-radius: 0 !important; }
+::-webkit-scrollbar { width: 2px !important; }
+::-webkit-scrollbar-thumb { background: var(--border2) !important; }

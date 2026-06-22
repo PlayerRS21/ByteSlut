@@ -1,0 +1,83 @@
+/*
+ * COMPACT THEME — Dense information display, small text, max data per screen
+ * Structural changes: reduced padding/margins everywhere, smaller fonts,
+ * narrower sidebar, tighter grid spacing.
+ */
+
+/* Sidebar: narrower */
+.sidebar { width: 140px !important; min-width: 140px !important; }
+.main-content { margin-left: 140px !important; }
+.sidebar-brand { padding: 10px 12px !important; }
+.sidebar-brand .name { font-size: 12px !important; }
+.sidebar-brand .tagline { font-size: 9px !important; }
+
+/* Nav: compact */
+.nav-link {
+  padding: 5px 10px !important;
+  font-size: 10px !important;
+  gap: 5px !important;
+}
+.nav-icon { font-size: 9px !important; }
+.nav-section {
+  font-size: 7px !important;
+  padding: 8px 10px 3px !important;
+}
+
+/* Cards: tight */
+.card { margin-bottom: 8px !important; }
+.card-body { padding: 8px 10px !important; }
+.card-header {
+  padding: 5px 10px !important;
+  font-size: 8px !important;
+  min-height: 0 !important;
+}
+
+/* Grid: 3-column on cards */
+.g4 { grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
+.g2 { gap: 8px !important; }
+
+/* Stats: compact */
+.stat { padding: 6px !important; }
+.stat-lbl { font-size: 8px !important; margin-bottom: 2px !important; }
+.stat-val { font-size: 20px !important; }
+.stat-sub { font-size: 9px !important; }
+
+/* Main content: tighter padding */
+.main-content > * { padding: 0 14px !important; }
+.page-header { padding: 10px 14px 6px !important; margin-bottom: 8px !important; }
+.page-header h1 { font-size: 16px !important; }
+.page-desc { font-size: 10px !important; }
+
+/* Tables: dense */
+.tbl th, .tbl td { padding: 4px 8px !important; font-size: 10px !important; }
+.tbl th { font-size: 8px !important; }
+
+/* Bars: thinner */
+.bar { height: 3px !important; margin-top: 3px !important; }
+
+/* Text: smaller everywhere */
+.text-sm { font-size: 11px !important; }
+.text-xs { font-size: 9px !important; }
+
+/* Badges: tiny */
+.badge { font-size: 8px !important; padding: 1px 4px !important; }
+
+/* Page tab buttons */
+.tab { padding: 4px 10px !important; font-size: 10px !important; }
+.tabs { margin-bottom: 8px !important; }
+
+/* Buttons */
+.btn { padding: 4px 10px !important; font-size: 10px !important; }
+
+/* Charts: shorter */
+.chart.h160 { height: 100px !important; }
+.chart.h140 { height: 90px !important; }
+
+/* Required selectors to pass validation */
+.card-red  { border-left-width: 2px !important; }
+.nav-link.active { color: var(--accent) !important; font-weight:700 !important; }
+.tab.active { color: var(--accent) !important; font-weight:700 !important; }
+.bar-fill { border-radius: 2px !important; }
+.field-input { border-radius: 4px !important; font-size: 10px !important; padding: 5px 8px !important; }
+::-webkit-scrollbar { width: 3px !important; }
+::-webkit-scrollbar-thumb { background: var(--border2) !important; border-radius: 2px !important; }

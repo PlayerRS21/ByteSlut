@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>Browser History</h1>
+  <div class="page-desc">Brave · Firefox · Chrome · localhost excluded</div>
+</div>
+<div class="tabs">
+  {% for p,l in [('today','Today'),('yesterday','Yesterday'),('week','Week'),('month','Month'),('year','Year')] %}
+  <a href="/browser?period={{ p }}" class="tab{{ ' active' if period==p else '' }}">{{ l }}</a>
+  {% endfor %}
+</div>
+<div class="g4 mb">
+  <div class="card card-red"><div class="stat">
+    <div class="stat-lbl">Total Visits</div>
+    <div class="stat-val c-accent">{{ stats.total_visits or 0 }}</div>
+    <div class="stat-sub">{{ stats.unique_domains or 0 }} unique domains</div>
+  </div></div>
+  <div class="card card-blue"><div class="stat">
+    <div class="stat-lbl">Browsing Time</div>
+    <div class="stat-val c-blue">{{ format_duration(stats.total_browsing_time or 0) }}</div>
+    <div class="stat-sub">non-YouTube sites only</div>
+  </div></div>
+  <div class="card card-red" style="border-left-color:var(--red)"><div class="stat">
+    <div class="stat-lbl">YouTube Videos</div>
+    <div class="stat-val c-red">{{ stats.youtube_visits or 0 }}</div>
+    <div class="stat-sub">{{ format_duration(stats.total_youtube_time or 0) }} watched</div>
+  </div></div>
+  <div class="card card-green"><div class="stat">
+    <div class="stat-lbl">Top Domain</div>
+    {% if top_domains %}
+    <div class="stat-val c-green" style="font-size:13px">{{ top_domains[0].domain }}</div>
+    <div class="stat-sub">{{ format_duration(top_domains[0].total_time) }}</div>
+    {% else %}<div class="stat-val c-green">—</div>{% endif %}
+  </div></div>
+</div>
+<div class="g2 mb">
+  <!-- Top domains -->
+  <div class="card">
+    <div class="card-header">Top Domains by Time</div>
+    <div class="card-body">
+      {% if top_domains %}
+      {% set mt = top_domains[0].total_time or 1 %}
+      {% for d in top_domains %}
+      <div class="mb8">
+        <div class="flex justify-between mb4">
+          <span class="text-sm {{ 'c-red' if 'youtube' in d.domain else '' }}">{{ d.domain }}</span>
+          <span class="text-xs text-muted">{{ d.visits }}× · {{ format_duration(d.total_time) }}</span>
+        </div>
+        <div class="bar"><div class="bar-fill {{ 'green' if not 'youtube' in d.domain else '' }}" style="background:{{ '#f87171' if 'youtube' in d.domain else '' }};width:{{ [((d.total_time or 0)/(mt)*100),100]|min|int }}%"></div></div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="empty"><div class="empty-txt">No browser data yet</div></div>
+      {% endif %}
+    </div>
+  </div>
+  <!-- YouTube videos — newest watched first, matching "Recent Pages" order -->
+  <div class="card">
+    <div class="card-header">▶ YouTube — Most Recently Watched</div>
+    {% if youtube_videos %}
+    <div style="max-height:360px;overflow-y:auto">
+      {% for v in youtube_videos %}
+      <div style="padding:8px 14px;border-bottom:1px solid var(--border)">
+        <div class="text-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+             title="{{ v.video_title }}">
+          {{ (v.video_title or '')[:62] }}{{ '…' if (v.video_title or '')|length > 62 else '' }}
+        </div>
+        <div class="flex gap8 mt4" style="align-items:center">
+          <span class="text-xs c-accent">⏱ {{ format_duration(v.total_duration) }}</span>
+          <span class="text-xs text-muted">{{ v.plays }} play{{ 's' if v.plays != 1 else '' }}</span>
+          <span class="text-xs text-muted" style="margin-left:auto">
+            {{ v.last_played|strftime('%H:%M') if v.last_played else '' }}
+          </span>
+          <span class="badge b-purple">{{ v.browser }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty"><div class="empty-icon">▶</div><div class="empty-txt">No YouTube history</div></div>
+    {% endif %}
+  </div>
+</div>
+<!-- Recent history -->
+<div class="card">
+  <div class="card-header">Recent Pages</div>
+  <div class="tbl-scroll">
+    <table class="tbl">
+      <thead><tr><th>Title</th><th>Domain</th><th>Time on Page</th><th>Browser</th><th>When</th></tr></thead>
+      <tbody>
+        {% for h in recent_history %}
+        <tr>
+          <td style="max-width:260px">
+            <a href="{{ h.url }}" target="_blank" rel="noopener"
+               title="{{ h.url }}"
+               style="color:{{ 'var(--red)' if h.is_youtube else 'var(--blue)' }};text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              {{ (h.youtube_title or h.title or h.url or '')[:60] }}
+            </a>
+          </td>
+          <td class="text-muted">{{ h.domain or '—' }}</td>
+          <td class="text-green">{{ format_duration(h.visit_duration_seconds) }}</td>
+          <td><span class="badge b-blue">{{ h.browser }}</span></td>
+          <td class="text-dim text-xs">{{ h.timestamp|strftime('%H:%M') if h.timestamp else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5"><div class="empty"><div class="empty-txt">No history this period</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

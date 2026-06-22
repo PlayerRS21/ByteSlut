@@ -1,0 +1,8 @@
+{
+  "name": "Glass",
+  "description": "Frosted glass panels with blur, gradient mesh background, glowing stats",
+  "author": "ByteSlut",
+  "version": "1.0",
+  "accent_default": "#ff4444",
+  "preview_colors": ["#050a10", "#ff4444", "rgba(255,255,255,0.04)"]
+}

@@ -1,0 +1,152 @@
+/*
+ * EXAMPLE THEME — Copy this folder and rename it to create your own theme.
+ * ========================================================================
+ * This file overrides the base design system. Change anything you want.
+ * The base styles are in web/templates/base.html inside <style> tags.
+ *
+ * REQUIRED: Your theme MUST cover these selectors (checked by validator):
+ *   .card, .card-header, .card-body, .card-red
+ *   .sidebar, .sidebar-brand
+ *   .nav-link, .nav-link.active
+ *   .main-content
+ *   .btn, .tab, .tab.active
+ *   .tbl, .bar, .bar-fill
+ *   .stat-val, .stat-lbl
+ *   .field-input, .badge
+ *   ::-webkit-scrollbar
+ *
+ * TIP: You don't need to cover everything if you only want to change a few
+ * things — but the validator will warn you about missing required selectors.
+ */
+
+/* ── Background ─────────────────────────────────────────────── */
+body {
+  background: #0d1117 !important;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+  background: #0d1117 !important;
+  border-right: 1px solid #21262d !important;
+}
+.sidebar-brand {
+  border-bottom: 1px solid #21262d !important;
+}
+
+/* ── Navigation ─────────────────────────────────────────────── */
+.nav-link {
+  color: #8b949e !important;
+  border-radius: 6px !important;
+}
+.nav-link:hover {
+  background: #161b22 !important;
+  color: #f0f6fc !important;
+}
+.nav-link.active {
+  background: rgba(0,180,216,0.1) !important;
+  color: #00b4d8 !important;
+  border-left: 2px solid #00b4d8 !important;
+}
+
+/* ── Main content ────────────────────────────────────────────── */
+.main-content {
+  background: #0d1117 !important;
+}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.card {
+  background: #161b22 !important;
+  border: 1px solid #21262d !important;
+  border-radius: 8px !important;
+}
+.card-header {
+  background: #0d1117 !important;
+  border-bottom: 1px solid #21262d !important;
+}
+.card-body {
+  padding: 14px 16px !important;
+}
+.card-red    { border-left: 2px solid #f85149 !important; }
+
+/* ── Stats ───────────────────────────────────────────────────── */
+.stat-val {
+  font-weight: 700 !important;
+}
+.stat-lbl {
+  font-size: 10px !important;
+  color: #8b949e !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* ── Bars ────────────────────────────────────────────────────── */
+.bar {
+  background: #21262d !important;
+  border-radius: 3px !important;
+}
+.bar-fill {
+  border-radius: 3px !important;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  background: #21262d !important;
+  border: 1px solid #30363d !important;
+  border-radius: 6px !important;
+  color: #f0f6fc !important;
+}
+.btn:hover {
+  background: #30363d !important;
+  border-color: #00b4d8 !important;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tab {
+  background: #161b22 !important;
+  border: 1px solid #21262d !important;
+  border-radius: 6px !important;
+  color: #8b949e !important;
+}
+.tab.active {
+  background: rgba(0,180,216,0.1) !important;
+  border-color: #00b4d8 !important;
+  color: #f0f6fc !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.tbl th {
+  color: #8b949e !important;
+  font-size: 9px !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+.tbl tbody tr:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* ── Form inputs ─────────────────────────────────────────────── */
+.field-input {
+  background: #0d1117 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 6px !important;
+  color: #f0f6fc !important;
+}
+.field-input:focus {
+  border-color: #00b4d8 !important;
+  outline: none !important;
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.badge {
+  border-radius: 4px !important;
+  font-size: 9px !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px !important; height: 6px !important; }
+::-webkit-scrollbar-track { background: #0d1117 !important; }
+::-webkit-scrollbar-thumb {
+  background: #30363d !important;
+  border-radius: 3px !important;
+}
+::-webkit-scrollbar-thumb:hover { background: #00b4d8 !important; }
